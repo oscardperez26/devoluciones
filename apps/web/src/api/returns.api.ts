@@ -71,6 +71,17 @@ export async function uploadFileToS3(uploadUrl: string, file: File): Promise<voi
   });
 }
 
+export async function uploadEvidenceDirect(
+  returnId: string,
+  devolucionItemId: string,
+  file: File,
+): Promise<void> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('devolucionItemId', devolucionItemId);
+  await wizardClient.post(`/returns/${returnId}/evidences/upload`, formData);
+}
+
 export async function confirmUpload(
   returnId: string,
   devolucionItemId: string,

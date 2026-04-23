@@ -108,6 +108,7 @@ model Devolucion {
   metodoReembolso   TipoReembolso?     @map("metodo_reembolso")
   totalReembolso    Decimal?           @map("total_reembolso") @db.Decimal(12, 2)
   notas             String?
+  codigoBono        String?            @map("codigo_bono")
   enviadaEn         DateTime?          @map("enviada_en")
   creadoEn          DateTime           @default(now()) @map("creado_en")
   actualizadoEn     DateTime           @updatedAt @map("actualizado_en")

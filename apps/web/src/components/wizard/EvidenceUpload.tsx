@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { confirmUpload, getUploadUrl, uploadFileToS3 } from '@/api/returns.api';
+import { uploadEvidenceDirect } from '@/api/returns.api';
 
 interface Props {
   returnId: string;
@@ -10,7 +10,7 @@ interface Props {
 export default function EvidenceUpload({ returnId, devolucionItemId, onUploaded }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [count, setCount] = useState(0);
+  const [uploaded, setUploaded] = useState(false);
   const [error, setError] = useState('');
 
   async function handleFile(file: File) {
@@ -27,12 +27,8 @@ export default function EvidenceUpload({ returnId, devolucionItemId, onUploaded 
     setError('');
     setUploading(true);
     try {
-      const { uploadUrl, fileKey } = await getUploadUrl(returnId, devolucionItemId, file);
-      await uploadFileToS3(uploadUrl, file);
-      await confirmUpload(returnId, devolucionItemId, fileKey, file);
-      const next = count + 1;
-      setCount(next);
-      if (next >= 5) onUploaded();
+      await uploadEvidenceDirect(returnId, devolucionItemId, file);
+      setUploaded(true);
     } catch {
       setError('Error al subir la imagen. Intenta de nuevo.');
     } finally {
@@ -40,18 +36,34 @@ export default function EvidenceUpload({ returnId, devolucionItemId, onUploaded 
     }
   }
 
+  if (uploaded) {
+    return (
+      <div className="mt-2 space-y-2">
+        <p className="text-sm text-green-600 font-medium">✓ Foto subida correctamente</p>
+        <button
+          type="button"
+          onClick={onUploaded}
+          className="w-full bg-[#111827] text-white text-sm font-semibold rounded-xl py-2.5 transition-colors hover:bg-gray-800"
+        >
+          Confirmar y continuar →
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-2">
       <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+        className="border-2 border-dashed border-gray-300 rounded-xl p-5 text-center cursor-pointer hover:border-gray-400 transition-colors"
         onClick={() => inputRef.current?.click()}
       >
         {uploading ? (
-          <p className="text-sm text-gray-500">Subiendo...</p>
+          <p className="text-sm text-gray-500 animate-pulse">Subiendo foto...</p>
         ) : (
           <>
-            <p className="text-sm text-gray-600">Haz clic para subir una foto</p>
-            <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP · Máx. 10 MB · {count}/5 subidas</p>
+            <p className="text-2xl mb-1">📷</p>
+            <p className="text-sm font-medium text-gray-700">Haz clic para subir la foto</p>
+            <p className="text-xs text-gray-400 mt-1">JPEG, PNG o WebP · Máx. 10 MB</p>
           </>
         )}
       </div>
@@ -63,18 +75,6 @@ export default function EvidenceUpload({ returnId, devolucionItemId, onUploaded 
         onChange={(e) => { if (e.target.files?.[0]) void handleFile(e.target.files[0]); }}
       />
       {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
-      {count > 0 && !error && (
-        <p className="text-xs text-green-600 mt-1">✓ {count} foto(s) subida(s)</p>
-      )}
-      {count > 0 && (
-        <button
-          type="button"
-          onClick={onUploaded}
-          className="mt-2 text-xs text-gray-500 underline"
-        >
-          Continuar sin subir más
-        </button>
-      )}
     </div>
   );
 }

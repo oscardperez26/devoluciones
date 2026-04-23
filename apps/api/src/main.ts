@@ -1,12 +1,15 @@
 import { Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor';
 import { PrismaService } from './infrastructure/database/prisma.service';
 
 async function bootstrap() {
+  mkdirSync(join(process.cwd(), 'uploads'), { recursive: true });
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 

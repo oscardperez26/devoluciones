@@ -44,3 +44,10 @@ export async function getTimeline(id: string): Promise<StatusHistory[]> {
   const res = await adminClient.get<StatusHistory[]>(`/admin/returns/${id}/timeline`);
   return res.data;
 }
+
+export async function fetchEvidenceBlob(returnId: string, evidenceId: string): Promise<string> {
+  const res = await adminClient.get(`/admin/returns/${returnId}/evidences/${evidenceId}/download`, {
+    responseType: 'blob',
+  });
+  return URL.createObjectURL(res.data as Blob);
+}

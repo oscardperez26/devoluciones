@@ -113,6 +113,29 @@ export class EvidencesService {
     }
   }
 
+  async confirmDirectUpload(
+    returnId: string,
+    devolucionItemId: string,
+    file: Express.Multer.File,
+    ctx: AccessContext,
+  ) {
+    await this.verifyReturnOwnership(returnId, ctx.orderId);
+    await this.verifyItemBelongsToReturn(devolucionItemId, returnId);
+    await this.checkEvidenceLimit(devolucionItemId);
+
+    const evidencia = await this.prisma.evidencia.create({
+      data: {
+        devolucionItemId,
+        claveArchivo: `uploads/${file.filename}`,
+        bucket: 'local',
+        tipoMime: file.mimetype,
+        tamanioBytes: file.size,
+      },
+    });
+
+    return { id: evidencia.id };
+  }
+
   private getExtension(mimeType: string): string {
     const map: Record<string, string> = {
       'image/jpeg': 'jpg',

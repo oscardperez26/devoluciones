@@ -1,4 +1,5 @@
 import type {
+  BonoEmitidoPayload,
   ReturnConfirmedPayload,
   StatusUpdatedPayload,
 } from './email.types';
@@ -62,6 +63,34 @@ export function statusUpdatedTemplate(p: StatusUpdatedPayload): {
         </p>
       </div>
       <p style="color:#6B7280;margin:0">Si tienes dudas, comunícate con nuestro equipo de servicio al cliente.</p>
+    `),
+  };
+}
+
+export function bonoEmitidoTemplate(p: BonoEmitidoPayload): {
+  subject: string;
+  html: string;
+} {
+  return {
+    subject: `Tu bono Ogloba está listo — ${p.codigoBono}`,
+    html: wrap(`
+      <h2 style="color:#111827;margin:0 0 8px">¡Tu reembolso está listo! 🎁</h2>
+      <p style="color:#6B7280;margin:0 0 24px">Hemos procesado tu devolución exitosamente. A continuación encontrarás tu bono Ogloba.</p>
+
+      <div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:12px;padding:24px;margin:0 0 24px;text-align:center">
+        <p style="margin:0 0 8px;color:#15803D;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Código de bono Ogloba</p>
+        <p style="margin:0;font-size:28px;font-weight:700;letter-spacing:0.12em;color:#111827;font-family:monospace">${p.codigoBono}</p>
+      </div>
+
+      <div style="background:#F3F4F6;border-radius:8px;padding:20px;margin:0 0 24px">
+        <p style="margin:0 0 8px;color:#374151"><strong>Ticket:</strong> ${p.ticketNumber}</p>
+        <p style="margin:0;color:#374151"><strong>Valor del bono:</strong> $${p.totalRefund.toLocaleString('es-CO')} COP</p>
+      </div>
+
+      <p style="color:#6B7280;font-size:13px;margin:0">
+        Puedes canjear este bono en cualquier tienda Koaj / Permoda o en nuestra tienda en línea.
+        El bono es de uso único y no tiene fecha de vencimiento.
+      </p>
     `),
   };
 }

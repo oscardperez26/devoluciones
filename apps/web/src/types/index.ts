@@ -130,4 +130,5 @@ export interface AdminReturnDetail extends AdminReturn {
   items: AdminReturnItem[];
   historial: StatusHistory[];
   notas: string | null;
+  codigoBono: string | null;
 }

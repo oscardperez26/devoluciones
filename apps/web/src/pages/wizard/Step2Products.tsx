@@ -21,9 +21,9 @@ const REASON_LABELS: Record<string, string> = {
 };
 
 const BLOCKED_LABELS: Record<string, { text: string; icon: string }> = {
-  ACTIVE_RETURN:   { icon: '🔄', text: 'Ya tiene una solicitud de devolución en proceso.' },
-  ALREADY_REFUNDED:{ icon: '✅', text: 'Este producto ya fue reembolsado anteriormente.' },
-  NOT_RETURNABLE:  { icon: '🚫', text: 'Este producto no es elegible para devolución.' },
+  ACTIVE_RETURN:    { icon: '🔄', text: 'Ya tiene una solicitud de devolución en proceso.' },
+  ALREADY_REFUNDED: { icon: '✅', text: 'Este producto ya fue reembolsado anteriormente.' },
+  NOT_RETURNABLE:   { icon: '🚫', text: 'Este producto no es elegible para devolución.' },
 };
 
 type Phase = 'selecting' | 'evidence';
@@ -50,20 +50,19 @@ export default function Step2Products() {
     });
   }
 
-  function toggleReason(itemId: string, code: string) {
+  function selectReason(itemId: string, code: string) {
     setSelected((prev) =>
       prev.map((s) => {
         if (s.orderItemId !== itemId) return s;
-        const has = s.reasonCodes.includes(code);
-        const codes = has ? s.reasonCodes.filter((r) => r !== code) : [...s.reasonCodes, code].slice(0, 3);
-        return { ...s, reasonCodes: codes };
+        const alreadySelected = s.reasonCodes[0] === code;
+        return { ...s, reasonCodes: alreadySelected ? [] : [code] };
       }),
     );
   }
 
   async function saveDraft() {
     if (selected.length === 0) { setError('Selecciona al menos un producto.'); return; }
-    if (selected.some((s) => s.reasonCodes.length === 0)) { setError('Selecciona al menos una causal por producto.'); return; }
+    if (selected.some((s) => s.reasonCodes.length === 0)) { setError('Selecciona el motivo de devolución de cada producto.'); return; }
     setError('');
     setSaving(true);
     try {
@@ -90,11 +89,17 @@ export default function Step2Products() {
   }
 
   function handleEvidenceDone(itemId: string) {
-    setEvidenceDone((prev) => new Set([...prev, itemId]));
+    setEvidenceDone((prev) => {
+      const next = new Set([...prev, itemId]);
+      if (itemsNeedingEvidence.every((s) => next.has(s.devolucionItemId!))) {
+        goToStep(3);
+        navigate('/paso-3');
+      }
+      return next;
+    });
   }
 
   const itemsNeedingEvidence = selected.filter((s) => s.requiresEvidence && s.devolucionItemId);
-  const allEvidenceDone = itemsNeedingEvidence.every((s) => evidenceDone.has(s.devolucionItemId!));
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Cargando productos...</p></div>;
 
@@ -122,41 +127,59 @@ export default function Step2Products() {
                     }`}
                   >
                     <div
-                      className={`p-4 flex gap-4 ${!blocked ? 'cursor-pointer' : ''}`}
+                      className={`p-4 flex gap-3 ${!blocked ? 'cursor-pointer' : ''}`}
                       onClick={() => { if (!blocked) toggleItem(item); }}
                     >
-                      <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-[#111827] border-[#111827]' : 'border-gray-300'
-                      }`}>
-                        {isSelected && <span className="text-white text-xs">✓</span>}
-                      </div>
+                      {/* Product image */}
+                      {item.imageUrl ? (
+                        <img
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          className="w-16 h-16 object-cover rounded-xl flex-shrink-0"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-100 rounded-xl flex-shrink-0 flex items-center justify-center">
+                          <span className="text-2xl text-gray-300">👕</span>
+                        </div>
+                      )}
+
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{item.productName}</p>
-                        <p className="text-xs text-gray-500">{item.sku}{item.size && ` · Talla ${item.size}`}{item.color && ` · ${item.color}`}</p>
-                        <p className="text-sm font-semibold mt-1">${item.unitPrice.toLocaleString('es-CO')}</p>
-                        {blocked && (() => {
-                          const bl = BLOCKED_LABELS[item.blockedReason ?? ''];
-                          return (
-                            <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                              <span>{bl?.icon ?? '⚠️'}</span>
-                              <span>{bl?.text ?? 'No disponible para devolución.'}</span>
-                            </p>
-                          );
-                        })()}
+                        <div className="flex gap-3 items-start">
+                          <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                            isSelected ? 'bg-[#111827] border-[#111827]' : 'border-gray-300'
+                          }`}>
+                            {isSelected && <span className="text-white text-xs">✓</span>}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">{item.productName}</p>
+                            <p className="text-xs text-gray-500">{item.sku}{item.size && ` · Talla ${item.size}`}{item.color && ` · Color ${item.color}`}</p>
+                            <p className="text-sm font-semibold mt-1">${item.unitPrice.toLocaleString('es-CO')}</p>
+                            {blocked && (() => {
+                              const bl = BLOCKED_LABELS[item.blockedReason ?? ''];
+                              return (
+                                <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                                  <span>{bl?.icon ?? '🚫'}</span>
+                                  <span>{bl?.text ?? 'No disponible para devolución.'}</span>
+                                </p>
+                              );
+                            })()}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
                     {isSelected && sel && (
                       <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Motivo(s) (máx. 3):</p>
+                        <p className="text-xs font-medium text-gray-700 mb-2">Motivo de devolución:</p>
                         <div className="flex flex-wrap gap-2">
                           {item.eligibleReasons.map((r) => (
                             <button
                               key={r.code}
                               type="button"
-                              onClick={() => toggleReason(item.id, r.code)}
+                              onClick={() => selectReason(item.id, r.code)}
                               className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                                sel.reasonCodes.includes(r.code)
+                                sel.reasonCodes[0] === r.code
                                   ? 'bg-[#111827] text-white border-[#111827]'
                                   : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'
                               }`}
@@ -197,10 +220,21 @@ export default function Step2Products() {
                 const item = data?.items.find((i) => i.id === s.orderItemId);
                 return (
                   <div key={s.devolucionItemId} className="bg-white rounded-2xl shadow-sm p-4">
-                    <p className="font-medium text-sm mb-1">{item?.productName ?? s.orderItemId}</p>
-                    <p className="text-xs text-gray-500 mb-3">Causales: {s.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(', ')}</p>
+                    <div className="flex gap-3 mb-3">
+                      {item?.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.productName} className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center">
+                          <span className="text-lg text-gray-300">👕</span>
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium text-sm">{item?.productName ?? s.orderItemId}</p>
+                        <p className="text-xs text-gray-500">Motivo: {s.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(', ')}</p>
+                      </div>
+                    </div>
                     {evidenceDone.has(s.devolucionItemId!) ? (
-                      <p className="text-sm text-green-600">✓ Evidencias subidas</p>
+                      <p className="text-sm text-green-600 font-medium">✓ Foto subida correctamente</p>
                     ) : (
                       <EvidenceUpload
                         returnId={returnId!}
@@ -213,19 +247,7 @@ export default function Step2Products() {
               })}
             </div>
 
-            <button
-              onClick={() => { goToStep(3); navigate('/paso-3'); }}
-              disabled={!allEvidenceDone}
-              className="w-full mt-6 bg-[#111827] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 transition-colors"
-            >
-              Continuar →
-            </button>
-            <button
-              onClick={() => { goToStep(3); navigate('/paso-3'); }}
-              className="w-full mt-2 text-sm text-gray-400 underline hover:text-gray-600"
-            >
-              Saltar evidencias y continuar
-            </button>
+            <p className="text-xs text-center text-gray-400 mt-6">Confirma la foto de cada producto para continuar.</p>
           </>
         )}
       </div>

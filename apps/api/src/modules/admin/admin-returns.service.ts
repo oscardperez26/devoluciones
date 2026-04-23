@@ -4,6 +4,9 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { EstadoDevolucion } from '@prisma/client';
+import type { Response } from 'express';
+import { createReadStream } from 'fs';
+import { basename, join } from 'path';
 import { AuditService } from '../../audit/audit.service';
 import type { AdminUser } from '../../common/decorators/admin-user.decorator';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
@@ -24,6 +27,17 @@ const VALID_TRANSITIONS: Partial<Record<EstadoDevolucion, EstadoDevolucion[]>> =
     ],
     [EstadoDevolucion.REEMBOLSO_EN_PROCESO]: [EstadoDevolucion.COMPLETADA],
   };
+
+// Caracteres sin ambigüedad (sin 0/O, 1/I/L)
+const BONO_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function generarCodigoBono(): string {
+  const segment = (len: number) =>
+    Array.from({ length: len }, () =>
+      BONO_CHARS[Math.floor(Math.random() * BONO_CHARS.length)],
+    ).join('');
+  return `OGL-${segment(4)}-${segment(4)}-${segment(4)}`;
+}
 
 @Injectable()
 export class AdminReturnsService {
@@ -149,6 +163,8 @@ export class AdminReturnsService {
       select: {
         id: true,
         estado: true,
+        numeroTicket: true,
+        totalReembolso: true,
         pedido: { select: { correoCliente: true } },
       },
     });
@@ -164,11 +180,18 @@ export class AdminReturnsService {
       );
     }
 
+    const esCompletada = newStatus === EstadoDevolucion.COMPLETADA;
+    const codigoBono = esCompletada ? generarCodigoBono() : undefined;
+
     const updated = await this.prisma.$transaction(async (tx) => {
       const result = await tx.devolucion.update({
         where: { id: returnId },
-        data: { estado: newStatus, ...(dto.notes && { notas: dto.notes }) },
-        select: { id: true, estado: true, numeroTicket: true },
+        data: {
+          estado: newStatus,
+          ...(dto.notes && { notas: dto.notes }),
+          ...(codigoBono && { codigoBono }),
+        },
+        select: { id: true, estado: true, numeroTicket: true, codigoBono: true },
       });
 
       await tx.historialEstado.create({
@@ -190,13 +213,43 @@ export class AdminReturnsService {
       metadata: { from: devolucion.estado, to: newStatus },
     });
 
-    this.notifications.send('STATUS_UPDATED', {
-      returnId,
-      newStatus,
-      email: devolucion.pedido.correoCliente,
-    });
+    if (esCompletada && codigoBono) {
+      this.notifications.send('BONO_EMITIDO', {
+        returnId,
+        ticketNumber: devolucion.numeroTicket ?? returnId,
+        email: devolucion.pedido.correoCliente,
+        codigoBono,
+        totalRefund: Number(devolucion.totalReembolso ?? 0),
+      });
+    } else {
+      this.notifications.send('STATUS_UPDATED', {
+        returnId,
+        newStatus,
+        email: devolucion.pedido.correoCliente,
+      });
+    }
 
     return updated;
+  }
+
+  async downloadEvidence(
+    returnId: string,
+    evidenceId: string,
+    res: Response,
+  ): Promise<void> {
+    const evidencia = await this.prisma.evidencia.findFirst({
+      where: { id: evidenceId, devolucionItem: { devolucionId: returnId } },
+      select: { claveArchivo: true, bucket: true, tipoMime: true },
+    });
+
+    if (!evidencia) throw new NotFoundException('Evidencia no encontrada');
+
+    const filePath = join(process.cwd(), evidencia.claveArchivo);
+    res.set({
+      'Content-Type': evidencia.tipoMime,
+      'Content-Disposition': `inline; filename="${basename(filePath)}"`,
+    });
+    createReadStream(filePath).pipe(res);
   }
 
   async getTimeline(returnId: string) {

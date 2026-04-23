@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Job } from 'bullmq';
 import { Resend } from 'resend';
 import {
+  bonoEmitidoTemplate,
   returnConfirmedTemplate,
   statusUpdatedTemplate,
 } from '../email.templates';
@@ -53,6 +54,10 @@ export class EmailWorker extends WorkerHost {
       case 'STATUS_UPDATED':
         return statusUpdatedTemplate(
           payload as EmailPayloadMap['STATUS_UPDATED'],
+        );
+      case 'BONO_EMITIDO':
+        return bonoEmitidoTemplate(
+          payload as EmailPayloadMap['BONO_EMITIDO'],
         );
     }
   }

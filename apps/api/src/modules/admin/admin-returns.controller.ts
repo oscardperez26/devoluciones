@@ -5,8 +5,10 @@ import {
   Param,
   Patch,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   AdminUser,
   type AdminUser as IAdminUser,
@@ -57,5 +59,14 @@ export class AdminReturnsController {
   @Get(':id/timeline')
   getTimeline(@Param('id') id: string) {
     return this.adminReturnsService.getTimeline(id);
+  }
+
+  @Get(':id/evidences/:evidenceId/download')
+  async downloadEvidence(
+    @Param('id') returnId: string,
+    @Param('evidenceId') evidenceId: string,
+    @Res() res: Response,
+  ) {
+    await this.adminReturnsService.downloadEvidence(returnId, evidenceId, res);
   }
 }

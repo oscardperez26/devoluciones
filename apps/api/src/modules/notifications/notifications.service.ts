@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
-import { returnConfirmedTemplate, statusUpdatedTemplate } from './email.templates';
+import {
+  bonoEmitidoTemplate,
+  returnConfirmedTemplate,
+  statusUpdatedTemplate,
+} from './email.templates';
 import type { EmailPayloadMap, EmailType } from './email.types';
 
 @Injectable()
@@ -34,6 +38,8 @@ export class NotificationsService {
         return returnConfirmedTemplate(payload as EmailPayloadMap['RETURN_CONFIRMED']);
       case 'STATUS_UPDATED':
         return statusUpdatedTemplate(payload as EmailPayloadMap['STATUS_UPDATED']);
+      case 'BONO_EMITIDO':
+        return bonoEmitidoTemplate(payload as EmailPayloadMap['BONO_EMITIDO']);
     }
   }
 }

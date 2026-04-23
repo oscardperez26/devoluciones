@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { changeStatus, getReturnDetail, getTimeline } from '@/api/admin.api';
+import { changeStatus, fetchEvidenceBlob, getReturnDetail, getTimeline } from '@/api/admin.api';
 import StatusBadge from '@/components/admin/StatusBadge';
 import StatusTimeline from '@/components/admin/StatusTimeline';
+import type { AdminEvidence } from '@/types';
 
 const TRANSITIONS: Record<string, string[]> = {
   ENVIADA: ['EN_REVISION'],
@@ -16,6 +17,58 @@ const STATUS_LABELS: Record<string, string> = {
   EN_REVISION: 'En revisión', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada',
   PRODUCTO_RECIBIDO: 'Producto recibido', REEMBOLSO_EN_PROCESO: 'Reembolso en proceso', COMPLETADA: 'Completada',
 };
+
+function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: AdminEvidence }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let url = '';
+    fetchEvidenceBlob(returnId, evidence.id)
+      .then((u) => { url = u; setBlobUrl(u); })
+      .catch(() => setError(true));
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [returnId, evidence.id]);
+
+  function handleDownload() {
+    if (!blobUrl) return;
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `evidencia-${evidence.id.slice(0, 8)}.${evidence.tipoMime.split('/')[1]}`;
+    a.click();
+  }
+
+  if (error) {
+    return (
+      <div className="w-24 h-24 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center text-xs text-red-400 text-center p-1">
+        No disponible
+      </div>
+    );
+  }
+
+  if (!blobUrl) {
+    return <div className="w-24 h-24 bg-gray-100 rounded-lg animate-pulse" />;
+  }
+
+  return (
+    <div className="relative group flex-shrink-0">
+      <img
+        src={blobUrl}
+        alt="Evidencia"
+        className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+        onClick={() => window.open(blobUrl, '_blank')}
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-lg transition-all flex items-end justify-center pb-1.5 opacity-0 group-hover:opacity-100">
+        <button
+          onClick={handleDownload}
+          className="text-white text-xs font-medium bg-black/60 px-2 py-0.5 rounded-full"
+        >
+          ↓ Descargar
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function ReturnDetail() {
   const { id } = useParams<{ id: string }>();
@@ -102,29 +155,58 @@ export default function ReturnDetail() {
             )}
           </div>
 
+          {/* Bono Ogloba */}
+          {data.codigoBono && (
+            <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🎁</span>
+                <h2 className="font-semibold text-sm text-green-800">Bono Ogloba emitido</h2>
+              </div>
+              <p className="text-xs text-green-700 mb-2">Este código fue enviado al correo del cliente.</p>
+              <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-center">
+                <p className="font-mono font-bold text-xl tracking-widest text-[#111827]">{data.codigoBono}</p>
+              </div>
+            </div>
+          )}
+
           {/* Items */}
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="font-semibold text-sm text-gray-700 mb-3">Productos ({data.items.length})</h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {data.items.map((item) => (
                 <div key={item.id} className="border border-gray-100 rounded-lg p-3">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="font-medium text-sm">{item.pedidoItem.nombreProducto}</p>
-                      <p className="text-xs text-gray-500">{item.pedidoItem.sku}{item.pedidoItem.talla && ` · T. ${item.pedidoItem.talla}`}{item.pedidoItem.color && ` · ${item.pedidoItem.color}`}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.pedidoItem.sku}
+                        {item.pedidoItem.talla && ` · T. ${item.pedidoItem.talla}`}
+                        {item.pedidoItem.color && ` · ${item.pedidoItem.color}`}
+                      </p>
                     </div>
                     <span className="text-sm font-semibold">${Number(item.valorUnitario).toLocaleString('es-CO')}</span>
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-1 mb-2">
                     {item.causales.map((c) => (
                       <span key={c} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c}</span>
                     ))}
                   </div>
-                  {item.evidencias.length > 0 && (
-                    <p className="text-xs text-blue-600 mt-1">📷 {item.evidencias.length} evidencia(s)</p>
-                  )}
                   {item.comentarios && (
-                    <p className="text-xs text-gray-500 mt-1 italic">"{item.comentarios}"</p>
+                    <p className="text-xs text-gray-500 mb-2 italic">"{item.comentarios}"</p>
+                  )}
+
+                  {/* Evidencias */}
+                  {item.evidencias.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-xs font-medium text-gray-600 mb-2">
+                        📷 Evidencias ({item.evidencias.length})
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {item.evidencias.map((ev) => (
+                          <EvidenceThumb key={ev.id} returnId={data.id} evidence={ev} />
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
