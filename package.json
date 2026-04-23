@@ -1,0 +1,22 @@
+{
+  "name": "devoluciones-v3",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run start:dev --workspace=api",
+    "dev:web": "npm run dev --workspace=web",
+    "build:api": "npm run build --workspace=api",
+    "build:web": "npm run build --workspace=web",
+    "test:api": "npm run test --workspace=api",
+    "test:web": "npm run test --workspace=web",
+    "lint:api": "npm run lint --workspace=api",
+    "lint:web": "npm run lint --workspace=web"
+  },
+  "dependencies": {
+    "@nestjs/platform-express": "^11.1.19"
+  }
+}

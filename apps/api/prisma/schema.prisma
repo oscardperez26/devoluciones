@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RolAdmin {
+  AGENTE
+  SUPERVISOR
+  ADMIN
+}
+
+model UsuarioAdmin {
+  id            String   @id @default(uuid()) @db.Uuid
+  nombre        String
+  correo        String   @unique
+  passwordHash  String   @map("password_hash")
+  rol           RolAdmin
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now()) @map("creado_en")
+  actualizadoEn DateTime @updatedAt @map("actualizado_en")
+
+  @@map("usuarios_admin")
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+enum EstadoDevolucion {
+  BORRADOR
+  ENVIADA
+  EN_REVISION
+  APROBADA
+  PRODUCTO_RECIBIDO
+  REEMBOLSO_EN_PROCESO
+  COMPLETADA
+  RECHAZADA
+}
+
+enum TipoEntrega {
+  TIENDA
+  TRANSPORTADORA
+}
+
+enum TipoReembolso {
+  TARJETA_REGALO
+  MERCADOPAGO
+  MEDIO_ORIGINAL
+}
+
+model Pedido {
+  id                String       @id @default(uuid()) @db.Uuid
+  numeroPedido      String       @unique @map("numero_pedido")
+  correoCliente     String       @map("correo_cliente")
+  correoClienteHash String       @map("correo_cliente_hash")
+  nombreCliente     String       @map("nombre_cliente")
+  estado            EstadoPedido
+  total             Decimal      @db.Decimal(12, 2)
+  moneda            String       @db.Char(3)
+  fechaCompra       DateTime     @map("fecha_compra")
+  fechaEntrega      DateTime?    @map("fecha_entrega")
+  externalId        String?      @map("external_id")
+  metadata          Json?
+  creadoEn          DateTime     @default(now()) @map("creado_en")
+  actualizadoEn     DateTime     @updatedAt @map("actualizado_en")
+
+  items        PedidoItem[]
+  devoluciones Devolucion[]
+
+  @@map("pedidos")
+}
+
+model PedidoItem {
+  id             String           @id @default(uuid()) @db.Uuid
+  pedidoId       String           @map("pedido_id") @db.Uuid
+  sku            String
+  nombreProducto String           @map("nombre_producto")
+  talla          String?
+  color          String?
+  precioUnitario Decimal          @map("precio_unitario") @db.Decimal(12, 2)
+  cantidad       Int
+  urlImagen      String?          @map("url_imagen")
+  esDevolvible   Boolean          @default(true) @map("es_devolvible")
+  fechaLimite    DateTime?        @map("fecha_limite")
+
+  pedido       Pedido            @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  devoluciones DevolucionItem[]
+
+  @@map("pedido_items")
+}
+
+model Devolucion {
+  id                String             @id @default(uuid()) @db.Uuid
+  numeroTicket      String?            @unique @map("numero_ticket")
+  pedidoId          String             @map("pedido_id") @db.Uuid
+  correoClienteHash String             @map("correo_cliente_hash")
+  estado            EstadoDevolucion   @default(BORRADOR)
+  metodoEntrega     TipoEntrega?       @map("metodo_entrega")
+  tiendaId          String?            @map("tienda_id") @db.Uuid
+  direccionEnvio    Json?              @map("direccion_envio")
+  metodoReembolso   TipoReembolso?     @map("metodo_reembolso")
+  totalReembolso    Decimal?           @map("total_reembolso") @db.Decimal(12, 2)
+  notas             String?
+  enviadaEn         DateTime?          @map("enviada_en")
+  creadoEn          DateTime           @default(now()) @map("creado_en")
+  actualizadoEn     DateTime           @updatedAt @map("actualizado_en")
+
+  pedido    Pedido             @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  tienda    Tienda?            @relation(fields: [tiendaId], references: [id], onDelete: SetNull)
+  items     DevolucionItem[]
+  historial HistorialEstado[]
+
+  @@map("devoluciones")
+}
+
+model DevolucionItem {
+  id            String        @id @default(uuid()) @db.Uuid
+  devolucionId  String        @map("devolucion_id") @db.Uuid
+  pedidoItemId  String        @map("pedido_item_id") @db.Uuid
+  causales      String[]      @map("causales")
+  comentarios   String?
+  cantidad      Int           @default(1)
+  valorUnitario Decimal       @map("valor_unitario") @db.Decimal(12, 2)
+
+  devolucion Devolucion      @relation(fields: [devolucionId], references: [id], onDelete: Cascade)
+  pedidoItem PedidoItem      @relation(fields: [pedidoItemId], references: [id], onDelete: Cascade)
+  evidencias Evidencia[]
+
+  @@map("devolucion_items")
+}
+
+model Evidencia {
+  id               String          @id @default(uuid()) @db.Uuid
+  devolucionItemId String          @map("devolucion_item_id") @db.Uuid
+  claveArchivo     String          @map("clave_archivo")
+  bucket           String
+  tipoMime         String          @map("tipo_mime")
+  tamanioBytes     Int             @map("tamanio_bytes")
+  esValido         Boolean         @default(true)
+  creadoEn         DateTime        @default(now()) @map("creado_en")
+
+  devolucionItem DevolucionItem    @relation(fields: [devolucionItemId], references: [id], onDelete: Cascade)
+
+  @@map("evidencias")
+}
+
+model HistorialEstado {
+  id             String             @id @default(uuid()) @db.Uuid
+  devolucionId   String             @map("devolucion_id") @db.Uuid
+  estadoAnterior EstadoDevolucion?
+  estadoNuevo    EstadoDevolucion
+  cambiadoPor    String             @map("cambiado_por")
+  notas          String?
+  creadoEn       DateTime           @default(now()) @map("creado_en")
+
+  devolucion Devolucion            @relation(fields: [devolucionId], references: [id], onDelete: Cascade)
+
+  @@map("historial_estados")
+}
+
+model Tienda {
+  id           String        @id @default(uuid()) @db.Uuid
+  nombre       String
+  direccion    String
+  ciudad       String
+  departamento String
+  telefono     String?
+  horario      String?
+  activo       Boolean       @default(true)
+
+  devoluciones Devolucion[]
+
+  @@map("tiendas")
+}
+
+model Auditoria {
+  id          String    @id @default(uuid()) @db.Uuid
+  accion      String
+  actor       String
+  tipoRecurso String?   @map("tipo_recurso")
+  idRecurso   String?   @map("id_recurso") @db.Uuid
+  ip          String?
+  userAgent   String?
+  metadata    Json?
+  creadoEn    DateTime  @default(now())
+
+  @@map("auditoria")
+}
