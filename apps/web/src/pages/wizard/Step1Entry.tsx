@@ -53,7 +53,7 @@ export default function Step1Entry() {
               type="text"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
-              placeholder="Ej. 10045"
+              placeholder="Ej. PM-2024-001"
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
             />
           </div>

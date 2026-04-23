@@ -236,7 +236,58 @@ async function main() {
   });
   console.log(`  ✓ Pedido 3: ${pedido3.numeroPedido} (${email3}) — entregado hace 40 días`);
 
-  // ── 7. Devolución de ejemplo ya en proceso (para probar panel admin) ─────
+  // ── 7. Pedido prueba — correo real para validar notificaciones ───────────
+  const emailPrueba = 'odanieloperez26@hotmail.com';
+  const pedidoPrueba = await prisma.pedido.create({
+    data: {
+      numeroPedido: 'PM-PRUEBA-001',
+      correoCliente: emailPrueba,
+      correoClienteHash: emailHash(emailPrueba),
+      nombreCliente: 'Oscar Daniel Pérez',
+      estado: 'ENTREGADO',
+      total: 489700,
+      moneda: 'COP',
+      fechaCompra: daysAgo(8),
+      fechaEntrega: daysAgo(2),
+      items: {
+        create: [
+          {
+            sku: 'CAM-002-L',
+            nombreProducto: 'Camisa Lino Blanca',
+            talla: 'L',
+            color: 'Blanco',
+            precioUnitario: 119900,
+            cantidad: 1,
+            urlImagen: null,
+            esDevolvible: true,
+          },
+          {
+            sku: 'PAN-002-34',
+            nombreProducto: 'Pantalón Casual Gris',
+            talla: '34',
+            color: 'Gris',
+            precioUnitario: 139900,
+            cantidad: 1,
+            urlImagen: null,
+            esDevolvible: true,
+          },
+          {
+            sku: 'ZAP-002-43',
+            nombreProducto: 'Tenis Cuero Blanco',
+            talla: '43',
+            color: 'Blanco',
+            precioUnitario: 229900,
+            cantidad: 1,
+            urlImagen: null,
+            esDevolvible: true,
+          },
+        ],
+      },
+    },
+  });
+  console.log(`  ✓ Pedido prueba: ${pedidoPrueba.numeroPedido} (${emailPrueba}) — entregado hace 2 días`);
+
+  // ── 8. Devolución de ejemplo ya en proceso (para probar panel admin) ─────
   const items1 = await prisma.pedidoItem.findMany({ where: { pedidoId: pedido1.id } });
   const itemCamisa = items1.find(i => i.sku === 'CAM-001-M')!;
 
@@ -291,6 +342,7 @@ async function main() {
   console.log('    Agente:   agente@permoda.com.co /  Agente1234!\n');
   console.log('  WIZARD DEVOLUCIONES:');
   console.log('    URL:      http://localhost:5173');
+  console.log('    Pedido prueba (correo real):  PM-PRUEBA-001  /  odanieloperez26@hotmail.com');
   console.log('    Pedido 1 (5d+30d abiertos):  PM-2024-001  /  carlos.garcia@gmail.com');
   console.log('    Pedido 2 (solo 30d):          PM-2024-002  /  maria.lopez@hotmail.com');
   console.log('    Pedido 3 (todo cerrado):      PM-2024-003  /  juan.perez@outlook.com');

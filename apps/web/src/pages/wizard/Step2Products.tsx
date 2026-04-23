@@ -40,7 +40,7 @@ export default function Step2Products() {
     setSelected((prev) => {
       const exists = prev.find((s) => s.orderItemId === item.id);
       if (exists) return prev.filter((s) => s.orderItemId !== item.id);
-      return [...prev, { orderItemId: item.id, reasonCodes: [], comments: '', quantity: 1 }];
+      return [...prev, { orderItemId: item.id, reasonCodes: [], comments: '', quantity: 1, productName: item.productName }];
     });
   }
 

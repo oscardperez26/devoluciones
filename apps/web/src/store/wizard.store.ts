@@ -4,6 +4,7 @@ import type { CarrierAddress, DraftItem } from '@/types';
 export interface SelectedItem extends DraftItem {
   devolucionItemId?: string;
   requiresEvidence?: boolean;
+  productName?: string;
 }
 
 interface WizardState {

@@ -27,7 +27,7 @@ export default function Step3Agreement() {
           {selectedItems.map((item) => (
             <div key={item.orderItemId} className="flex justify-between items-start text-sm border-b border-gray-50 pb-3 last:border-0 last:pb-0">
               <div>
-                <p className="font-medium text-[#111827]">{item.orderItemId}</p>
+                <p className="font-medium text-[#111827]">{item.productName ?? item.orderItemId}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {item.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(' · ')}
                 </p>
