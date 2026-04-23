@@ -6,6 +6,7 @@ import AdminLogin from '@/pages/admin/AdminLogin';
 import ReturnDetail from '@/pages/admin/ReturnDetail';
 import ReturnsList from '@/pages/admin/ReturnsList';
 import Confirmation from '@/pages/wizard/Confirmation';
+import StatusTracking from '@/pages/wizard/StatusTracking';
 import Step1Entry from '@/pages/wizard/Step1Entry';
 import Step2Products from '@/pages/wizard/Step2Products';
 import Step3Agreement from '@/pages/wizard/Step3Agreement';
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/paso-4" element={<RequireSession><Step4Delivery /></RequireSession>} />
         <Route path="/paso-5" element={<RequireSession><Step5Refund /></RequireSession>} />
         <Route path="/confirmacion" element={<Confirmation />} />
+        <Route path="/estado" element={<RequireSession><StatusTracking /></RequireSession>} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<RequireAdminAuth><AdminLayout /></RequireAdminAuth>}>
           <Route index element={<ReturnsList />} />

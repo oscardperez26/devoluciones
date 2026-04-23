@@ -3,7 +3,11 @@ import { useWizardStore } from '@/store/wizard.store';
 
 export default function Confirmation() {
   const navigate = useNavigate();
-  const { ticketNumber, totalRefund, confirmationEmail, reset } = useWizardStore();
+  const { ticketNumber, totalRefund, confirmationEmail, returnId, reset } = useWizardStore();
+
+  function handleViewStatus() {
+    navigate('/estado');
+  }
 
   function handleFinish() {
     reset();
@@ -57,12 +61,22 @@ export default function Confirmation() {
           Nuestro equipo revisará tu solicitud en los próximos 3 días hábiles y recibirás una notificación por correo.
         </p>
 
-        <button
-          onClick={handleFinish}
-          className="w-full bg-[#111827] hover:bg-gray-800 text-white font-semibold rounded-xl py-3 transition-colors"
-        >
-          Finalizar
-        </button>
+        <div className="space-y-3">
+          {returnId && (
+            <button
+              onClick={handleViewStatus}
+              className="w-full bg-[#111827] hover:bg-gray-800 text-white font-semibold rounded-xl py-3 transition-colors"
+            >
+              Ver estado de mi devolución →
+            </button>
+          )}
+          <button
+            onClick={handleFinish}
+            className="w-full border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold rounded-xl py-3 transition-colors"
+          >
+            Iniciar otra devolución
+          </button>
+        </div>
       </div>
     </div>
   );

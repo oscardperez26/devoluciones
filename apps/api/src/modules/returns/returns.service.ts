@@ -214,6 +214,29 @@ export class ReturnsService {
     };
   }
 
+  async getStatus(returnId: string, ctx: AccessContext) {
+    const devolucion = await this.returnsRepository.findStatusByIdAndOrderId(
+      returnId,
+      ctx.orderId,
+    );
+    if (!devolucion) throw new NotFoundException('Devolución no encontrada');
+
+    return {
+      returnId: devolucion.id,
+      ticketNumber: devolucion.numeroTicket,
+      status: devolucion.estado,
+      deliveryMethod: devolucion.metodoEntrega,
+      refundMethod: devolucion.metodoReembolso,
+      totalRefund: Number(devolucion.totalReembolso ?? 0),
+      submittedAt: devolucion.enviadaEn?.toISOString() ?? null,
+      history: devolucion.historial.map((h) => ({
+        status: h.estadoNuevo,
+        changedAt: h.creadoEn.toISOString(),
+        notes: h.notas,
+      })),
+    };
+  }
+
   private async findOwnedDraft(returnId: string, orderId: string) {
     const devolucion = await this.returnsRepository.findByIdAndOrderId(
       returnId,

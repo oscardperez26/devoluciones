@@ -20,6 +20,12 @@ const REASON_LABELS: Record<string, string> = {
   COLOR_LOSS: 'Perdió el color',
 };
 
+const BLOCKED_LABELS: Record<string, { text: string; icon: string }> = {
+  ACTIVE_RETURN:   { icon: '🔄', text: 'Ya tiene una solicitud de devolución en proceso.' },
+  ALREADY_REFUNDED:{ icon: '✅', text: 'Este producto ya fue reembolsado anteriormente.' },
+  NOT_RETURNABLE:  { icon: '🚫', text: 'Este producto no es elegible para devolución.' },
+};
+
 type Phase = 'selecting' | 'evidence';
 
 export default function Step2Products() {
@@ -128,7 +134,15 @@ export default function Step2Products() {
                         <p className="font-medium text-sm">{item.productName}</p>
                         <p className="text-xs text-gray-500">{item.sku}{item.size && ` · Talla ${item.size}`}{item.color && ` · ${item.color}`}</p>
                         <p className="text-sm font-semibold mt-1">${item.unitPrice.toLocaleString('es-CO')}</p>
-                        {blocked && <p className="text-xs text-red-500 mt-1">{item.blockedReason ?? 'No disponible para devolución'}</p>}
+                        {blocked && (() => {
+                          const bl = BLOCKED_LABELS[item.blockedReason ?? ''];
+                          return (
+                            <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                              <span>{bl?.icon ?? '⚠️'}</span>
+                              <span>{bl?.text ?? 'No disponible para devolución.'}</span>
+                            </p>
+                          );
+                        })()}
                       </div>
                     </div>
 

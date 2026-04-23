@@ -23,6 +23,28 @@ export async function submitReturn(returnId: string): Promise<SubmittedReturn> {
   return res.data;
 }
 
+export interface ReturnStatusHistory {
+  status: string;
+  changedAt: string;
+  notes: string | null;
+}
+
+export interface ReturnStatus {
+  returnId: string;
+  ticketNumber: string | null;
+  status: string;
+  deliveryMethod: string | null;
+  refundMethod: string | null;
+  totalRefund: number;
+  submittedAt: string | null;
+  history: ReturnStatusHistory[];
+}
+
+export async function getReturnStatus(returnId: string): Promise<ReturnStatus> {
+  const res = await wizardClient.get<ReturnStatus>(`/returns/${returnId}/status`);
+  return res.data;
+}
+
 export interface UploadUrlResponse {
   uploadUrl: string;
   fileKey: string;

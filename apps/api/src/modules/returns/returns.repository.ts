@@ -29,6 +29,25 @@ export class ReturnsRepository {
     });
   }
 
+  async findStatusByIdAndOrderId(returnId: string, orderId: string) {
+    return this.prisma.devolucion.findFirst({
+      where: { id: returnId, pedidoId: orderId },
+      select: {
+        id: true,
+        numeroTicket: true,
+        estado: true,
+        metodoEntrega: true,
+        metodoReembolso: true,
+        totalReembolso: true,
+        enviadaEn: true,
+        historial: {
+          select: { estadoNuevo: true, creadoEn: true, notas: true },
+          orderBy: { creadoEn: 'asc' },
+        },
+      },
+    });
+  }
+
   async upsertDraft(
     orderId: string,
     emailHash: string,

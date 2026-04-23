@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -61,5 +62,10 @@ export class ReturnsController {
   @HttpCode(HttpStatus.OK)
   submit(@Param('id') returnId: string, @AccessContext() ctx: IAccessContext) {
     return this.returnsService.submit(returnId, ctx);
+  }
+
+  @Get(':id/status')
+  getStatus(@Param('id') returnId: string, @AccessContext() ctx: IAccessContext) {
+    return this.returnsService.getStatus(returnId, ctx);
   }
 }
