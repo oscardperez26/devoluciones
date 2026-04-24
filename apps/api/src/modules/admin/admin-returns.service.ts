@@ -245,11 +245,21 @@ export class AdminReturnsService {
     if (!evidencia) throw new NotFoundException('Evidencia no encontrada');
 
     const filePath = join(process.cwd(), evidencia.claveArchivo);
+
+    if (!existsSync(filePath)) {
+      throw new NotFoundException('El archivo de evidencia no existe en disco');
+    }
+
     res.set({
       'Content-Type': evidencia.tipoMime,
       'Content-Disposition': `inline; filename="${basename(filePath)}"`,
     });
-    createReadStream(filePath).pipe(res);
+
+    const stream = createReadStream(filePath);
+    stream.on('error', () => {
+      if (!res.headersSent) res.status(404).json({ message: 'Error al leer el archivo' });
+    });
+    stream.pipe(res);
   }
 
   async getTimeline(returnId: string) {
