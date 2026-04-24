@@ -70,14 +70,14 @@ function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: Adm
 
   if (loadError) {
     return (
-      <div className="w-40 h-40 bg-red-50 border border-red-200 rounded-xl flex items-center justify-center text-xs text-red-400 text-center p-2">
+      <div className="w-64 h-64 bg-red-50 border border-red-200 rounded-xl flex items-center justify-center text-xs text-red-400 text-center p-2">
         No disponible
       </div>
     );
   }
 
   if (!blobUrl) {
-    return <div className="w-40 h-40 bg-gray-100 rounded-xl animate-pulse" />;
+    return <div className="w-64 h-64 bg-gray-100 rounded-xl animate-pulse" />;
   }
 
   return (
@@ -87,19 +87,19 @@ function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: Adm
         <img
           src={blobUrl}
           alt="Evidencia"
-          className="w-40 h-40 object-cover rounded-xl cursor-pointer"
+          className="w-64 h-64 object-cover rounded-xl cursor-pointer"
           onClick={() => setShowModal(true)}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-xl transition-all opacity-0 group-hover:opacity-100 flex flex-col items-center justify-end gap-1.5 pb-3">
           <button
             onClick={() => setShowModal(true)}
-            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-32 text-center"
+            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-40 text-center"
           >
             🔍 Ver imagen
           </button>
           <button
             onClick={handleDownload}
-            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-32 text-center"
+            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-40 text-center"
           >
             ↓ Descargar
           </button>
