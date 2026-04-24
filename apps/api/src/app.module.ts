@@ -10,6 +10,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { OrdersModule } from './modules/orders/orders.module';
 import { ReturnAccessModule } from './modules/return-access/return-access.module';
 import { ReturnsModule } from './modules/returns/returns.module';
+import { ReturnRulesModule } from './modules/return-rules/return-rules.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { EvidencesModule } from './modules/evidences/evidences.module';
 import { StoresModule } from './modules/stores/stores.module';
@@ -29,9 +30,9 @@ import { StoresModule } from './modules/stores/stores.module';
     OrdersModule,
     ReturnsModule,
     StoresModule,
+    ReturnRulesModule,
     AdminModule,
     EvidencesModule,
-
     NotificationsModule,
   ],
   controllers: [AppController],

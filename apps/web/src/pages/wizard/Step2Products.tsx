@@ -7,18 +7,7 @@ import EvidenceUpload from '@/components/wizard/EvidenceUpload';
 import StepIndicator from '@/components/wizard/StepIndicator';
 import type { SelectedItem } from '@/store/wizard.store';
 import { useWizardStore } from '@/store/wizard.store';
-import type { OrderItem } from '@/types';
-
-const REASON_LABELS: Record<string, string> = {
-  SIZE_SMALL: 'Demasiado pequeño',
-  SIZE_LARGE: 'Demasiado grande',
-  NOT_EXPECTED: 'No es lo que esperaba',
-  LATE_DELIVERY: 'Retraso — ya no lo quiero',
-  WRONG_ITEM: 'Se entregó artículo errado',
-  SEAM_DEFECT: 'Defecto de costura',
-  SHRUNK: 'Se encogió',
-  COLOR_LOSS: 'Perdió el color',
-};
+import type { EligibleReason, OrderItem } from '@/types';
 
 const BLOCKED_LABELS: Record<string, { text: string; icon: string }> = {
   ACTIVE_RETURN:    { icon: '🔄', text: 'Ya tiene una solicitud de devolución en proceso.' },
@@ -26,11 +15,84 @@ const BLOCKED_LABELS: Record<string, { text: string; icon: string }> = {
   NOT_RETURNABLE:   { icon: '🚫', text: 'Este producto no es elegible para devolución.' },
 };
 
+const GROUP_ORDER = ['Talla y expectativa', 'Entrega y despacho', 'Calidad del producto'];
+
 type Phase = 'selecting' | 'evidence';
+
+function groupReasons(reasons: EligibleReason[]): { grupo: string; items: EligibleReason[] }[] {
+  const map = new Map<string, EligibleReason[]>();
+  for (const r of reasons) {
+    const g = r.grupo ?? 'Otros';
+    if (!map.has(g)) map.set(g, []);
+    map.get(g)!.push(r);
+  }
+  const ordered: { grupo: string; items: EligibleReason[] }[] = [];
+  for (const g of GROUP_ORDER) {
+    if (map.has(g)) ordered.push({ grupo: g, items: map.get(g)! });
+  }
+  for (const [g, items] of map) {
+    if (!GROUP_ORDER.includes(g)) ordered.push({ grupo: g, items });
+  }
+  return ordered;
+}
+
+function ReasonPicker({
+  reasons,
+  selected,
+  onSelect,
+}: {
+  reasons: EligibleReason[];
+  selected: string;
+  onSelect: (code: string) => void;
+}) {
+  const groups = groupReasons(reasons);
+
+  if (reasons.length === 0) {
+    return <p className="text-xs text-orange-600 py-1">No hay motivos disponibles para este producto (plazo vencido).</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {groups.map(({ grupo, items }) => (
+        <div key={grupo}>
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{grupo}</p>
+          <div className="space-y-1.5">
+            {items.map((r) => (
+              <button
+                key={r.code}
+                type="button"
+                onClick={() => onSelect(r.code)}
+                className={`w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${
+                  selected === r.code
+                    ? 'bg-[#111827] border-[#111827] text-white'
+                    : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <span className="text-sm font-medium">{r.label}</span>
+                <span className="flex items-center gap-2 flex-shrink-0 ml-3">
+                  {r.requiresEvidence && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                      selected === r.code ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      📷 foto
+                    </span>
+                  )}
+                  <span className={`text-xs ${selected === r.code ? 'text-gray-300' : 'text-gray-400'}`}>
+                    {r.daysLeft}d
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Step2Products() {
   const navigate = useNavigate();
-  const { returnId, setReturnId, goToStep } = useWizardStore();
+  const { returnId, setReturnId, setViewReturnId, goToStep } = useWizardStore();
   const [phase, setPhase] = useState<Phase>('selecting');
   const [selected, setSelected] = useState<SelectedItem[]>([]);
   const [saving, setSaving] = useState(false);
@@ -54,10 +116,15 @@ export default function Step2Products() {
     setSelected((prev) =>
       prev.map((s) => {
         if (s.orderItemId !== itemId) return s;
-        const alreadySelected = s.reasonCodes[0] === code;
-        return { ...s, reasonCodes: alreadySelected ? [] : [code] };
+        return { ...s, reasonCodes: s.reasonCodes[0] === code ? [] : [code] };
       }),
     );
+  }
+
+  function handleViewBlockedReturn(item: OrderItem) {
+    if (!item.blockingReturnId) return;
+    setViewReturnId(item.blockingReturnId);
+    navigate('/estado');
   }
 
   async function saveDraft() {
@@ -123,7 +190,7 @@ export default function Step2Products() {
                   <div
                     key={item.id}
                     className={`bg-white rounded-2xl shadow-sm border-2 transition-colors ${
-                      blocked ? 'border-gray-100 opacity-60' : isSelected ? 'border-[#111827]' : 'border-transparent'
+                      blocked ? 'border-gray-100' : isSelected ? 'border-[#111827]' : 'border-transparent'
                     }`}
                   >
                     <div
@@ -146,22 +213,34 @@ export default function Step2Products() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex gap-3 items-start">
-                          <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                            isSelected ? 'bg-[#111827] border-[#111827]' : 'border-gray-300'
-                          }`}>
-                            {isSelected && <span className="text-white text-xs">✓</span>}
-                          </div>
+                          {!blocked && (
+                            <div className={`w-5 h-5 mt-0.5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                              isSelected ? 'bg-[#111827] border-[#111827]' : 'border-gray-300'
+                            }`}>
+                              {isSelected && <span className="text-white text-xs">✓</span>}
+                            </div>
+                          )}
                           <div className="min-w-0">
-                            <p className="font-medium text-sm">{item.productName}</p>
+                            <p className={`font-medium text-sm ${blocked ? 'text-gray-500' : ''}`}>{item.productName}</p>
                             <p className="text-xs text-gray-500">{item.sku}{item.size && ` · Talla ${item.size}`}{item.color && ` · Color ${item.color}`}</p>
                             <p className="text-sm font-semibold mt-1">${item.unitPrice.toLocaleString('es-CO')}</p>
                             {blocked && (() => {
                               const bl = BLOCKED_LABELS[item.blockedReason ?? ''];
                               return (
-                                <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                                  <span>{bl?.icon ?? '🚫'}</span>
-                                  <span>{bl?.text ?? 'No disponible para devolución.'}</span>
-                                </p>
+                                <div className="mt-2">
+                                  <p className="text-xs text-amber-600 flex items-center gap-1">
+                                    <span>{bl?.icon ?? '🚫'}</span>
+                                    <span>{bl?.text ?? 'No disponible para devolución.'}</span>
+                                  </p>
+                                  {item.blockingReturnId && (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleViewBlockedReturn(item); }}
+                                      className="mt-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+                                    >
+                                      Ver estado de esta devolución →
+                                    </button>
+                                  )}
+                                </div>
                               );
                             })()}
                           </div>
@@ -171,28 +250,12 @@ export default function Step2Products() {
 
                     {isSelected && sel && (
                       <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Motivo de devolución:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {item.eligibleReasons.map((r) => (
-                            <button
-                              key={r.code}
-                              type="button"
-                              onClick={() => selectReason(item.id, r.code)}
-                              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                                sel.reasonCodes[0] === r.code
-                                  ? 'bg-[#111827] text-white border-[#111827]'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'
-                              }`}
-                            >
-                              {REASON_LABELS[r.code] ?? r.code}
-                              {r.requiresEvidence && ' 📷'}
-                              <span className="ml-1 text-gray-400">{r.daysLeft}d</span>
-                            </button>
-                          ))}
-                        </div>
-                        {item.eligibleReasons.length === 0 && (
-                          <p className="text-xs text-orange-600">No hay causales disponibles para este producto.</p>
-                        )}
+                        <p className="text-xs font-medium text-gray-700 mb-3">Motivo de devolución:</p>
+                        <ReasonPicker
+                          reasons={item.eligibleReasons}
+                          selected={sel.reasonCodes[0] ?? ''}
+                          onSelect={(code) => selectReason(item.id, code)}
+                        />
                       </div>
                     )}
                   </div>
@@ -230,7 +293,7 @@ export default function Step2Products() {
                       )}
                       <div>
                         <p className="font-medium text-sm">{item?.productName ?? s.orderItemId}</p>
-                        <p className="text-xs text-gray-500">Motivo: {s.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(', ')}</p>
+                        <p className="text-xs text-gray-500">Motivo: {s.reasonCodes.join(', ')}</p>
                       </div>
                     </div>
                     {evidenceDone.has(s.devolucionItemId!) ? (

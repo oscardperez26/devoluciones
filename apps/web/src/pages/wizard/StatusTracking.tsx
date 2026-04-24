@@ -50,7 +50,7 @@ function getStepState(stepKey: string, currentStatus: string): StepState {
 
 export default function StatusTracking() {
   const navigate = useNavigate();
-  const { returnId, ticketNumber, totalRefund, reset } = useWizardStore();
+  const { returnId, ticketNumber, totalRefund, resetReturn } = useWizardStore();
   const [status, setStatus] = useState<ReturnStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -69,8 +69,8 @@ export default function StatusTracking() {
   const isRejected     = currentStatus === 'RECHAZADA';
 
   function handleNewReturn() {
-    reset();
-    navigate('/');
+    resetReturn();
+    navigate('/paso-2');
   }
 
   if (loading) {
@@ -202,10 +202,10 @@ export default function StatusTracking() {
             Iniciar otra devolución
           </button>
           <button
-            onClick={() => { reset(); navigate('/'); }}
+            onClick={() => navigate('/paso-2')}
             className="w-full border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold rounded-xl py-3 transition-colors"
           >
-            Salir
+            Volver a mis productos
           </button>
         </div>
 

@@ -51,3 +51,29 @@ export async function fetchEvidenceBlob(returnId: string, evidenceId: string): P
   });
   return URL.createObjectURL(res.data as Blob);
 }
+
+export interface ReturnRule {
+  id: string;
+  codigo: string;
+  label: string;
+  grupo: string;
+  plazosDias: number;
+  requiereEvidencia: boolean;
+  activo: boolean;
+  orden: number;
+}
+
+export async function listReturnRules(): Promise<ReturnRule[]> {
+  const res = await adminClient.get<ReturnRule[]>('/admin/return-rules');
+  return res.data;
+}
+
+export async function updateReturnRule(id: string, data: Partial<Omit<ReturnRule, 'id' | 'codigo'>>): Promise<ReturnRule> {
+  const res = await adminClient.patch<ReturnRule>(`/admin/return-rules/${id}`, data);
+  return res.data;
+}
+
+export async function createReturnRule(data: Omit<ReturnRule, 'id'>): Promise<ReturnRule> {
+  const res = await adminClient.post<ReturnRule>('/admin/return-rules', data);
+  return res.data;
+}

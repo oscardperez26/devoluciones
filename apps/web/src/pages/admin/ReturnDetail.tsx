@@ -18,15 +18,45 @@ const STATUS_LABELS: Record<string, string> = {
   PRODUCTO_RECIBIDO: 'Producto recibido', REEMBOLSO_EN_PROCESO: 'Reembolso en proceso', COMPLETADA: 'Completada',
 };
 
+function EvidenceModal({ blobUrl, onClose }: { blobUrl: string; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white text-3xl font-bold hover:text-gray-300 leading-none"
+        >
+          ✕
+        </button>
+        <img
+          src={blobUrl}
+          alt="Evidencia"
+          className="w-full object-contain rounded-xl max-h-[85vh]"
+        />
+      </div>
+    </div>
+  );
+}
+
 function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: AdminEvidence }) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     let url = '';
     fetchEvidenceBlob(returnId, evidence.id)
       .then((u) => { url = u; setBlobUrl(u); })
-      .catch(() => setError(true));
+      .catch(() => setLoadError(true));
     return () => { if (url) URL.revokeObjectURL(url); };
   }, [returnId, evidence.id]);
 
@@ -34,39 +64,48 @@ function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: Adm
     if (!blobUrl) return;
     const a = document.createElement('a');
     a.href = blobUrl;
-    a.download = `evidencia-${evidence.id.slice(0, 8)}.${evidence.tipoMime.split('/')[1]}`;
+    a.download = `evidencia-${evidence.id.slice(0, 8)}.${evidence.tipoMime.split('/')[1] ?? 'jpg'}`;
     a.click();
   }
 
-  if (error) {
+  if (loadError) {
     return (
-      <div className="w-24 h-24 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center text-xs text-red-400 text-center p-1">
+      <div className="w-40 h-40 bg-red-50 border border-red-200 rounded-xl flex items-center justify-center text-xs text-red-400 text-center p-2">
         No disponible
       </div>
     );
   }
 
   if (!blobUrl) {
-    return <div className="w-24 h-24 bg-gray-100 rounded-lg animate-pulse" />;
+    return <div className="w-40 h-40 bg-gray-100 rounded-xl animate-pulse" />;
   }
 
   return (
-    <div className="relative group flex-shrink-0">
-      <img
-        src={blobUrl}
-        alt="Evidencia"
-        className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-        onClick={() => window.open(blobUrl, '_blank')}
-      />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-lg transition-all flex items-end justify-center pb-1.5 opacity-0 group-hover:opacity-100">
-        <button
-          onClick={handleDownload}
-          className="text-white text-xs font-medium bg-black/60 px-2 py-0.5 rounded-full"
-        >
-          ↓ Descargar
-        </button>
+    <>
+      {showModal && <EvidenceModal blobUrl={blobUrl} onClose={() => setShowModal(false)} />}
+      <div className="relative group flex-shrink-0">
+        <img
+          src={blobUrl}
+          alt="Evidencia"
+          className="w-40 h-40 object-cover rounded-xl cursor-pointer"
+          onClick={() => setShowModal(true)}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-xl transition-all opacity-0 group-hover:opacity-100 flex flex-col items-center justify-end gap-1.5 pb-3">
+          <button
+            onClick={() => setShowModal(true)}
+            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-32 text-center"
+          >
+            🔍 Ver imagen
+          </button>
+          <button
+            onClick={handleDownload}
+            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-32 text-center"
+          >
+            ↓ Descargar
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -197,11 +236,11 @@ export default function ReturnDetail() {
 
                   {/* Evidencias */}
                   {item.evidencias.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-gray-100">
-                      <p className="text-xs font-medium text-gray-600 mb-2">
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <p className="text-xs font-medium text-gray-600 mb-3">
                         📷 Evidencias ({item.evidencias.length})
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3">
                         {item.evidencias.map((ev) => (
                           <EvidenceThumb key={ev.id} returnId={data.id} evidence={ev} />
                         ))}

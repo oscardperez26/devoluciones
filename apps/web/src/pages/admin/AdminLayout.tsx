@@ -31,6 +31,9 @@ export default function AdminLayout() {
           <NavLink to="/admin/devoluciones" className={navLinkClass}>
             📋 Devoluciones
           </NavLink>
+          <NavLink to="/admin/reglas" className={navLinkClass}>
+            ⚙️ Reglas
+          </NavLink>
         </nav>
 
         <div className="p-3 border-t border-gray-100">

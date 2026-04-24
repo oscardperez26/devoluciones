@@ -11,6 +11,7 @@ export interface EligibleReason {
   label: string;
   requiresEvidence: boolean;
   daysLeft: number;
+  grupo: string;
 }
 
 export interface OrderItem {
@@ -25,6 +26,7 @@ export interface OrderItem {
   returnStatus: string | null;
   eligibleReasons: EligibleReason[];
   blockedReason: string | null;
+  blockingReturnId: string | null;
 }
 
 export interface OrderWithItems {

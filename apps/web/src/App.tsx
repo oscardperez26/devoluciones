@@ -4,6 +4,7 @@ import RequireSession from '@/components/RequireSession';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import ReturnDetail from '@/pages/admin/ReturnDetail';
+import ReturnRules from '@/pages/admin/ReturnRules';
 import ReturnsList from '@/pages/admin/ReturnsList';
 import Confirmation from '@/pages/wizard/Confirmation';
 import StatusTracking from '@/pages/wizard/StatusTracking';
@@ -29,6 +30,7 @@ export default function App() {
           <Route index element={<ReturnsList />} />
           <Route path="devoluciones" element={<ReturnsList />} />
           <Route path="devoluciones/:id" element={<ReturnDetail />} />
+          <Route path="reglas" element={<ReturnRules />} />
         </Route>
       </Routes>
     </BrowserRouter>

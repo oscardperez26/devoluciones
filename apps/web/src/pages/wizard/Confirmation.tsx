@@ -3,15 +3,15 @@ import { useWizardStore } from '@/store/wizard.store';
 
 export default function Confirmation() {
   const navigate = useNavigate();
-  const { ticketNumber, totalRefund, confirmationEmail, returnId, reset } = useWizardStore();
+  const { ticketNumber, totalRefund, confirmationEmail, returnId, resetReturn } = useWizardStore();
 
   function handleViewStatus() {
     navigate('/estado');
   }
 
-  function handleFinish() {
-    reset();
-    navigate('/');
+  function handleNewReturn() {
+    resetReturn();
+    navigate('/paso-2');
   }
 
   if (!ticketNumber) {
@@ -71,7 +71,7 @@ export default function Confirmation() {
             </button>
           )}
           <button
-            onClick={handleFinish}
+            onClick={handleNewReturn}
             className="w-full border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold rounded-xl py-3 transition-colors"
           >
             Iniciar otra devolución

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ReturnRulesService } from '../return-rules/return-rules.service';
 import { OrdersRepository } from './orders.repository';
 import { ReturnEligibilityService } from './return-eligibility/return-eligibility.service';
 
@@ -7,10 +8,14 @@ export class OrdersService {
   constructor(
     private readonly ordersRepository: OrdersRepository,
     private readonly eligibilityService: ReturnEligibilityService,
+    private readonly returnRulesService: ReturnRulesService,
   ) {}
 
   async getOrderWithEligibility(orderId: string, today: Date = new Date()) {
-    const pedido = await this.ordersRepository.findWithItemsAndReturns(orderId);
+    const [pedido, activeRules] = await Promise.all([
+      this.ordersRepository.findWithItemsAndReturns(orderId),
+      this.returnRulesService.getActiveRules(),
+    ]);
 
     if (!pedido) {
       throw new NotFoundException('Pedido no encontrado');
@@ -26,6 +31,7 @@ export class OrdersService {
         item,
         orderContext,
         today,
+        activeRules,
       );
 
       return {
