@@ -46,46 +46,94 @@ function ReasonPicker({
   onSelect: (code: string) => void;
 }) {
   const groups = groupReasons(reasons);
+  const selectedReason = reasons.find((r) => r.code === selected);
+  const [openGroup, setOpenGroup] = useState<string | null>(
+    selectedReason ? (selectedReason.grupo ?? null) : null,
+  );
 
   if (reasons.length === 0) {
     return <p className="text-xs text-orange-600 py-1">No hay motivos disponibles para este producto (plazo vencido).</p>;
   }
 
+  function toggleGroup(grupo: string) {
+    setOpenGroup((prev) => (prev === grupo ? null : grupo));
+  }
+
   return (
-    <div className="space-y-3">
-      {groups.map(({ grupo, items }) => (
-        <div key={grupo}>
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{grupo}</p>
-          <div className="space-y-1.5">
-            {items.map((r) => (
-              <button
-                key={r.code}
-                type="button"
-                onClick={() => onSelect(r.code)}
-                className={`w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${
-                  selected === r.code
-                    ? 'bg-[#111827] border-[#111827] text-white'
-                    : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <span className="text-sm font-medium">{r.label}</span>
-                <span className="flex items-center gap-2 flex-shrink-0 ml-3">
-                  {r.requiresEvidence && (
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                      selected === r.code ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      📷 foto
-                    </span>
-                  )}
-                  <span className={`text-xs ${selected === r.code ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {r.daysLeft}d
+    <div className="space-y-1.5">
+      {groups.map(({ grupo, items }) => {
+        const isOpen = openGroup === grupo;
+        const groupSelected = items.find((r) => r.code === selected);
+
+        return (
+          <div key={grupo} className={`rounded-xl border overflow-hidden transition-colors ${isOpen ? 'border-[#111827]' : 'border-gray-200'}`}>
+            {/* Header del grupo */}
+            <button
+              type="button"
+              onClick={() => toggleGroup(grupo)}
+              className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-colors ${isOpen ? 'bg-[#111827] text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm font-medium truncate">{grupo}</span>
+                {groupSelected && !isOpen && (
+                  <span className="text-xs bg-white/20 text-white bg-opacity-20 px-2 py-0.5 rounded-full truncate max-w-[140px]" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                    ✓ {groupSelected.label}
                   </span>
-                </span>
-              </button>
-            ))}
+                )}
+                {groupSelected && !isOpen && (
+                  <span className="hidden" />
+                )}
+              </div>
+              <span className={`text-xs flex-shrink-0 ml-2 ${isOpen ? 'text-gray-300' : 'text-gray-400'}`}>
+                {isOpen ? '▲' : '▼'}
+              </span>
+            </button>
+
+            {/* Opciones desplegables */}
+            {isOpen && (
+              <div className="divide-y divide-gray-100">
+                {items.map((r) => {
+                  const isSelected = r.code === selected;
+                  return (
+                    <button
+                      key={r.code}
+                      type="button"
+                      onClick={() => { onSelect(r.code); setOpenGroup(null); }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${
+                        isSelected ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${isSelected ? 'border-[#111827] bg-[#111827]' : 'border-gray-300'}`}>
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                        <span className="text-sm text-gray-700">{r.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        {r.requiresEvidence && (
+                          <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">📷</span>
+                        )}
+                        <span className="text-xs text-gray-400">{r.daysLeft}d</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Motivo seleccionado visible cuando el grupo está cerrado */}
+            {groupSelected && !isOpen && (
+              <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#111827] flex-shrink-0" />
+                <span className="text-xs text-gray-700 truncate">{groupSelected.label}</span>
+                {groupSelected.requiresEvidence && (
+                  <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full flex-shrink-0">📷</span>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

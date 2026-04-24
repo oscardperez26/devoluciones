@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { EstadoDevolucion } from '@prisma/client';
 import type { Response } from 'express';
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 import { basename, join } from 'path';
 import { AuditService } from '../../audit/audit.service';
 import type { AdminUser } from '../../common/decorators/admin-user.decorator';
