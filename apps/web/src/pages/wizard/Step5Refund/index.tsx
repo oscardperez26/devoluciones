@@ -1,3 +1,4 @@
+import './Step5Refund.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorMessage, PrimaryButton, StepSubtitle, StepTitle, WizardPage } from '@/components/ui';
@@ -35,14 +36,14 @@ export default function Step5Refund() {
       <StepTitle>Método de reembolso</StepTitle>
       <StepSubtitle>Tu reembolso se procesará mediante bono Ogloba.</StepSubtitle>
 
-      <div className="bg-white rounded-xl border-2 border-[#111827] p-5 flex gap-4 items-start mb-6">
-        <span className="text-3xl flex-shrink-0">🎁</span>
-        <div className="flex-1">
-          <p className="font-semibold text-sm text-[#111827]">Tarjeta regalo (Bono Ogloba)</p>
-          <p className="text-xs text-gray-500 mt-1">Tarjeta digital enviada al correo. Disponible en ≈ 1 día hábil.</p>
+      <div className="refund-option">
+        <span className="refund-option-icon">🎁</span>
+        <div className="refund-option-body">
+          <p className="refund-option-title">Tarjeta regalo (Bono Ogloba)</p>
+          <p className="refund-option-desc">Tarjeta digital enviada al correo. Disponible en ≈ 1 día hábil.</p>
         </div>
-        <div className="w-5 h-5 rounded-full border-2 border-[#111827] bg-[#111827] flex-shrink-0 flex items-center justify-center mt-0.5">
-          <span className="text-white text-xs">✓</span>
+        <div className="refund-option-check">
+          <span className="refund-option-check-mark">✓</span>
         </div>
       </div>
 

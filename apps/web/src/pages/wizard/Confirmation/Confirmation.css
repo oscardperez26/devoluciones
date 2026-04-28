@@ -1,0 +1,161 @@
+/* ── Página de confirmación ──────────────────────────────────────────────── */
+
+.confirm-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.confirm-card {
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+  text-align: center;
+}
+
+/* ── Estado vacío ─────────────────────────────────────────────────────────── */
+
+.confirm-empty {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-empty-inner {
+  text-align: center;
+}
+
+.confirm-empty-text {
+  color: #6b7280;
+  margin: 0 0 1rem;
+}
+
+.confirm-empty-link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* ── Ícono de éxito ──────────────────────────────────────────────────────── */
+
+.confirm-icon {
+  width: 4rem;
+  height: 4rem;
+  background-color: #dcfce7;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.875rem;
+}
+
+.confirm-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem;
+}
+
+.confirm-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem;
+}
+
+/* ── Resumen ─────────────────────────────────────────────────────────────── */
+
+.confirm-summary {
+  background-color: var(--color-page);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.confirm-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.confirm-summary-label {
+  color: #6b7280;
+}
+
+.confirm-summary-value {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.confirm-summary-value--normal {
+  font-weight: 600;
+}
+
+.confirm-summary-value--light {
+  color: #374151;
+  font-weight: 400;
+}
+
+.confirm-note {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0 0 1.5rem;
+}
+
+/* ── Acciones ────────────────────────────────────────────────────────────── */
+
+.confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.confirm-btn-primary {
+  width: 100%;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.confirm-btn-primary:hover {
+  background-color: #1f2937;
+}
+
+.confirm-btn-secondary {
+  width: 100%;
+  background-color: transparent;
+  color: #4b5563;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.confirm-btn-secondary:hover {
+  border-color: #9ca3af;
+}

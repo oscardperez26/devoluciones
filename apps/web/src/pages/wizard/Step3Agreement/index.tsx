@@ -1,6 +1,7 @@
+import './Step3Agreement.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ErrorMessage, PrimaryButton, StepCard, StepSubtitle, StepTitle, WizardPage } from '@/components/ui';
+import { PrimaryButton, StepCard, StepSubtitle, StepTitle, WizardPage } from '@/components/ui';
 import StepIndicator from '@/components/wizard/StepIndicator';
 import { useWizardStore } from '@/store/wizard.store';
 
@@ -22,37 +23,39 @@ export default function Step3Agreement() {
       <StepTitle>Resumen de tu devolución</StepTitle>
       <StepSubtitle>Revisa los productos y acepta los términos para continuar.</StepSubtitle>
 
-      <StepCard className="mb-6 space-y-3">
-        {selectedItems.map((item) => (
-          <div key={item.orderItemId} className="flex justify-between items-start text-sm border-b border-gray-50 pb-3 last:border-0 last:pb-0">
-            <div>
-              <p className="font-medium text-[#111827]">{item.productName ?? item.orderItemId}</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {item.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(' · ')}
-              </p>
+      <StepCard>
+        <div className="summary-items">
+          {selectedItems.map((item) => (
+            <div key={item.orderItemId} className="summary-item">
+              <div>
+                <p className="summary-item-name">{item.productName ?? item.orderItemId}</p>
+                <p className="summary-item-reason">
+                  {item.reasonCodes.map((c) => REASON_LABELS[c] ?? c).join(' · ')}
+                </p>
+              </div>
+              <span className="summary-item-qty">×{item.quantity}</span>
             </div>
-            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">×{item.quantity}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </StepCard>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
-        <p className="font-medium mb-2">Condiciones de devolución</p>
-        <ul className="list-disc list-inside space-y-1 text-xs">
+      <div className="conditions-box">
+        <p className="conditions-title">Condiciones de devolución</p>
+        <ul className="conditions-list">
           <li>El producto debe estar sin usar, con etiquetas originales.</li>
           <li>El reembolso se procesa una vez recibamos el producto.</li>
           <li>Los plazos de reembolso dependen del método seleccionado.</li>
         </ul>
       </div>
 
-      <label className="flex items-start gap-3 cursor-pointer mb-6">
+      <label className="accept-row">
         <input
           type="checkbox"
           checked={accepted}
           onChange={(e) => setAccepted(e.target.checked)}
-          className="mt-0.5 w-4 h-4 accent-[#111827]"
+          className="accept-checkbox"
         />
-        <span className="text-sm text-gray-700">Acepto las condiciones de devolución y confirmo que la información es correcta.</span>
+        <span className="accept-text">Acepto las condiciones de devolución y confirmo que la información es correcta.</span>
       </label>
 
       <PrimaryButton

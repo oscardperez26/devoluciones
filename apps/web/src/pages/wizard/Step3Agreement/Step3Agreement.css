@@ -1,0 +1,94 @@
+/* ── Resumen de productos ────────────────────────────────────────────────── */
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f9fafb;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.summary-item-name {
+  font-weight: 500;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.summary-item-reason {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.125rem 0 0;
+}
+
+.summary-item-qty {
+  font-size: 0.75rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* ── Condiciones ─────────────────────────────────────────────────────────── */
+
+.conditions-box {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: #1e40af;
+}
+
+.conditions-title {
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+}
+
+.conditions-list {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* ── Aceptar términos ────────────────────────────────────────────────────── */
+
+.accept-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+.accept-checkbox {
+  margin-top: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.accept-text {
+  font-size: 0.875rem;
+  color: #374151;
+}

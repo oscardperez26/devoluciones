@@ -1,0 +1,101 @@
+/* ── Página de entrada ───────────────────────────────────────────────────── */
+
+.entry-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.entry-card {
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.entry-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.25rem;
+}
+
+.entry-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 2rem;
+}
+
+.entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.entry-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.entry-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.entry-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgb(79 70 229 / 0.15);
+}
+
+.entry-error {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+.entry-btn {
+  width: 100%;
+  background-color: var(--color-accent);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.entry-btn:hover {
+  background-color: #4338ca;
+}
+
+.entry-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

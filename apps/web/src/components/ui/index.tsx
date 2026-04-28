@@ -1,29 +1,24 @@
-/** Componentes UI reutilizables del wizard */
+import './WizardUI.css';
+import type { ReactNode } from 'react';
 
-// ── Layout ────────────────────────────────────────────────────────────────────
-
-export function WizardPage({ children }: { children: React.ReactNode }) {
+export function WizardPage({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#F9FAFB] py-8 px-4">
-      <div className="max-w-2xl mx-auto">{children}</div>
+    <div className="wizard-page">
+      <div className="wizard-container">{children}</div>
     </div>
   );
 }
 
-// ── Tipografía ────────────────────────────────────────────────────────────────
-
-export function StepTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xl font-bold text-[#111827] mb-2">{children}</h2>;
+export function StepTitle({ children }: { children: ReactNode }) {
+  return <h2 className="step-title">{children}</h2>;
 }
 
-export function StepSubtitle({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-gray-500 mb-6">{children}</p>;
+export function StepSubtitle({ children }: { children: ReactNode }) {
+  return <p className="step-subtitle">{children}</p>;
 }
-
-// ── Botones ───────────────────────────────────────────────────────────────────
 
 interface PrimaryButtonProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   type?: 'button' | 'submit';
@@ -31,28 +26,19 @@ interface PrimaryButtonProps {
 
 export function PrimaryButton({ children, onClick, disabled, type = 'button' }: PrimaryButtonProps) {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className="w-full bg-[#111827] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 transition-colors"
-    >
+    <button type={type} onClick={onClick} disabled={disabled} className="primary-btn">
       {children}
     </button>
   );
 }
 
-// ── Cards ─────────────────────────────────────────────────────────────────────
-
-export function StepCard({ children, className }: { children: React.ReactNode; className?: string }) {
+export function StepCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl shadow-sm p-4 ${className ?? ''}`}>
+    <div className={['step-card', className ?? ''].filter(Boolean).join(' ')}>
       {children}
     </div>
   );
 }
-
-// ── Formulario ────────────────────────────────────────────────────────────────
 
 interface FormInputProps {
   label: string;
@@ -64,22 +50,20 @@ interface FormInputProps {
 
 export function FormInput({ label, value, onChange, type = 'text', placeholder }: FormInputProps) {
   return (
-    <div>
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+    <div className="form-field">
+      <label className="form-label">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
+        className="form-input"
       />
     </div>
   );
 }
 
-// ── Mensajes ──────────────────────────────────────────────────────────────────
-
 export function ErrorMessage({ message }: { message: string }) {
   if (!message) return null;
-  return <p className="text-sm text-red-600 mb-4">{message}</p>;
+  return <p className="wizard-error">{message}</p>;
 }

@@ -1,0 +1,52 @@
+/* ── Opción de reembolso ─────────────────────────────────────────────────── */
+
+.refund-option {
+  background-color: var(--color-surface);
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-primary);
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.refund-option-icon {
+  font-size: 1.875rem;
+  flex-shrink: 0;
+}
+
+.refund-option-body {
+  flex: 1;
+}
+
+.refund-option-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.refund-option-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0;
+}
+
+.refund-option-check {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-primary);
+  background-color: var(--color-primary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.125rem;
+}
+
+.refund-option-check-mark {
+  color: #fff;
+  font-size: 0.75rem;
+}

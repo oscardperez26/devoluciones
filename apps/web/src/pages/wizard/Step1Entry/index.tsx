@@ -1,3 +1,4 @@
+import './Step1Entry.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startSession } from '@/api/access.api';
@@ -11,7 +12,7 @@ export default function Step1Entry() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!orderNumber.trim() || !email.trim()) {
       setError('Completa todos los campos.');
@@ -37,48 +38,38 @@ export default function Step1Entry() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="entry-page"
       style={{
         background: 'linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url(https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1600) center/cover no-repeat',
       }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-[#111827] mb-1">Devoluciones</h1>
-        <p className="text-gray-500 text-sm mb-8">Ingresa tu número de pedido y correo para continuar.</p>
+      <div className="entry-card">
+        <h1 className="entry-title">Devoluciones</h1>
+        <p className="entry-subtitle">Ingresa tu número de pedido y correo para continuar.</p>
 
-        <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Número de pedido</label>
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="entry-form">
+          <div className="entry-field">
+            <label className="entry-label">Número de pedido</label>
             <input
               type="text"
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
               placeholder="Ej. PM-2024-001"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              className="entry-input"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+          <div className="entry-field">
+            <label className="entry-label">Correo electrónico</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@correo.com"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
+              className="entry-input"
             />
           </div>
-
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-60 text-white font-semibold rounded-lg py-3 transition-colors"
-          >
+          {error && <p className="entry-error">{error}</p>}
+          <button type="submit" disabled={loading} className="entry-btn">
             {loading ? 'Verificando...' : 'Continuar'}
           </button>
         </form>

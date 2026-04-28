@@ -1,0 +1,103 @@
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+.wizard-page {
+  min-height: 100vh;
+  background-color: var(--color-page);
+  padding: 2rem 1rem;
+}
+
+.wizard-container {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+/* ── Tipografía ──────────────────────────────────────────────────────────── */
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem;
+}
+
+.step-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 1.5rem;
+}
+
+/* ── Botón principal ─────────────────────────────────────────────────────── */
+
+.primary-btn {
+  width: 100%;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.primary-btn:hover {
+  background-color: #1f2937;
+}
+
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+
+.step-card {
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Formulario ──────────────────────────────────────────────────────────── */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+}
+
+.form-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(17 24 39 / 0.15);
+}
+
+/* ── Error ───────────────────────────────────────────────────────────────── */
+
+.wizard-error {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+  margin: 0 0 1rem;
+}

@@ -1,3 +1,4 @@
+import './Step4Delivery.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorMessage, FormInput, PrimaryButton, StepCard, StepSubtitle, StepTitle, WizardPage } from '@/components/ui';
@@ -66,19 +67,17 @@ export default function Step4Delivery() {
       <StepTitle>Método de entrega</StepTitle>
       <StepSubtitle>¿Cómo nos entregas el producto?</StepSubtitle>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="delivery-methods">
         {(['TIENDA', 'TRANSPORTADORA'] as Method[]).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMethod(m)}
-            className={`p-4 rounded-xl border-2 text-left transition-colors ${
-              method === m ? 'border-[#111827] bg-gray-50' : 'border-gray-200 hover:border-gray-400'
-            }`}
+            className={`delivery-method-btn ${method === m ? 'delivery-method-btn--selected' : ''}`}
           >
-            <p className="text-2xl mb-1">{m === 'TIENDA' ? '🏪' : '🚚'}</p>
-            <p className="font-semibold text-sm">{m === 'TIENDA' ? 'Entrega en tienda' : 'Recogida en domicilio'}</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <span className="delivery-method-icon">{m === 'TIENDA' ? '🏪' : '🚚'}</span>
+            <p className="delivery-method-name">{m === 'TIENDA' ? 'Entrega en tienda' : 'Recogida en domicilio'}</p>
+            <p className="delivery-method-desc">
               {m === 'TIENDA' ? 'Lleva el producto a nuestra tienda más cercana' : 'Una transportadora recoge el paquete en tu dirección'}
             </p>
           </button>
@@ -86,16 +85,16 @@ export default function Step4Delivery() {
       </div>
 
       {method === 'TIENDA' && (
-        <StepCard className="mb-6">
-          <p className="text-sm font-medium text-gray-700 mb-3">Selecciona la tienda</p>
+        <StepCard>
+          <p className="address-section-label">Selecciona la tienda</p>
           <StorePicker onSelect={setSelectedStore} selectedStoreId={selectedStore?.id ?? null} />
         </StepCard>
       )}
 
       {method === 'TRANSPORTADORA' && (
-        <StepCard className="mb-6">
-          <p className="text-sm font-medium text-gray-700 mb-3">Dirección de recogida</p>
-          <div className="space-y-3">
+        <StepCard>
+          <p className="address-section-label">Dirección de recogida</p>
+          <div className="address-form">
             {ADDRESS_FIELDS.map(({ field, label }) => (
               <FormInput
                 key={field}

@@ -1,0 +1,72 @@
+/* ── Selector de tienda ──────────────────────────────────────────────────── */
+
+.store-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.store-select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background-color: #fff;
+  outline: none;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.store-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(17 24 39 / 0.15);
+}
+
+.store-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.store-option {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 2px solid #e5e7eb;
+  background-color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.store-option:hover {
+  border-color: #9ca3af;
+}
+
+.store-option--selected {
+  border-color: var(--color-primary);
+  background-color: #f9fafb;
+}
+
+.store-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.store-address {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.store-hours {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
