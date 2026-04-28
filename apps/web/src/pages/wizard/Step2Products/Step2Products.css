@@ -30,8 +30,8 @@
 }
 
 .product-img {
-  width: 4rem;
-  height: 4rem;
+  width: 10rem;
+  height: 10rem;
   object-fit: cover;
   border-radius: 0.75rem;
   flex-shrink: 0;
