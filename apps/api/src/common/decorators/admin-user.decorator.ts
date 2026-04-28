@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { RolAdmin } from '@prisma/client';
+import type { RolAdmin } from '../types/prisma-enums';
 import type { Request } from 'express';
 
 export interface AdminUser {

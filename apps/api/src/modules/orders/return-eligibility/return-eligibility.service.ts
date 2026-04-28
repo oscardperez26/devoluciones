@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EstadoDevolucion } from '@prisma/client';
+import { EstadoDevolucion } from '../../../common/types/prisma-enums';
 import {
   ACTIVE_STATUSES,
   REASONS,

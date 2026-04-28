@@ -3,7 +3,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { EstadoDevolucion } from '@prisma/client';
+import { EstadoDevolucion } from '../../common/types/prisma-enums';
 import type { Response } from 'express';
 import { createReadStream, existsSync } from 'fs';
 import { basename, join } from 'path';
@@ -57,37 +57,31 @@ export class AdminReturnsService {
       ...(dateTo && { creadoEn: { lte: new Date(dateTo) } }),
       ...(search && {
         OR: [
-          { numeroTicket: { contains: search, mode: 'insensitive' as const } },
-          {
-            pedido: {
-              nombreCliente: { contains: search, mode: 'insensitive' as const },
-            },
-          },
+          { numeroTicket: { contains: search } },
+          { pedido: { nombreCliente: { contains: search } } },
         ],
       }),
     };
 
-    const [returns, total] = await Promise.all([
-      this.prisma.devolucion.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { creadoEn: 'desc' },
-        select: {
-          id: true,
-          numeroTicket: true,
-          estado: true,
-          totalReembolso: true,
-          metodoEntrega: true,
-          metodoReembolso: true,
-          creadoEn: true,
-          enviadaEn: true,
-          pedido: { select: { numeroPedido: true, nombreCliente: true } },
-          items: { select: { id: true } },
-        },
-      }),
-      this.prisma.devolucion.count({ where }),
-    ]);
+    const returns = await this.prisma.devolucion.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { creadoEn: 'desc' },
+      select: {
+        id: true,
+        numeroTicket: true,
+        estado: true,
+        totalReembolso: true,
+        metodoEntrega: true,
+        metodoReembolso: true,
+        creadoEn: true,
+        enviadaEn: true,
+        pedido: { select: { numeroPedido: true, nombreCliente: true } },
+        items: { select: { id: true } },
+      },
+    });
+    const total = await this.prisma.devolucion.count({ where });
 
     return {
       returns: returns.map((r) => ({
@@ -149,6 +143,7 @@ export class AdminReturnsService {
       items: devolucion.items.map((item) => ({
         ...item,
         valorUnitario: Number(item.valorUnitario),
+        causales: JSON.parse(item.causales) as string[],
       })),
     };
   }

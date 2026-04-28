@@ -12,10 +12,8 @@ export class OrdersService {
   ) {}
 
   async getOrderWithEligibility(orderId: string, today: Date = new Date()) {
-    const [pedido, activeRules] = await Promise.all([
-      this.ordersRepository.findWithItemsAndReturns(orderId),
-      this.returnRulesService.getActiveRules(),
-    ]);
+    const pedido = await this.ordersRepository.findWithItemsAndReturns(orderId);
+    const activeRules = await this.returnRulesService.getActiveRules();
 
     if (!pedido) {
       throw new NotFoundException('Pedido no encontrado');

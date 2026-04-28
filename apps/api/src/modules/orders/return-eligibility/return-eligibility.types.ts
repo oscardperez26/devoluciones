@@ -1,4 +1,4 @@
-import type { EstadoDevolucion } from '@prisma/client';
+import type { EstadoDevolucion } from '../../../common/types/prisma-enums';
 
 export const REASONS = {
   SIZE_SMALL:   { label: 'Demasiado pequeño',                      deadlineDays: 5,  requiresEvidence: false, grupo: 'Talla y expectativa' },
@@ -13,13 +13,13 @@ export const REASONS = {
 
 export type ReasonCode = keyof typeof REASONS;
 
-export const ACTIVE_STATUSES = [
+export const ACTIVE_STATUSES: ReadonlyArray<EstadoDevolucion> = [
   'ENVIADA',
   'EN_REVISION',
   'APROBADA',
   'PRODUCTO_RECIBIDO',
   'REEMBOLSO_EN_PROCESO',
-] as const satisfies ReadonlyArray<EstadoDevolucion>;
+];
 
 export interface EligibleReason {
   code: string;
@@ -47,7 +47,7 @@ export interface OrderItemForEligibility {
   devoluciones: {
     devolucion: {
       id: string;
-      estado: EstadoDevolucion;
+      estado: string;
     };
   }[];
 }

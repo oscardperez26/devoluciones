@@ -1,4 +1,4 @@
-import type { RolAdmin } from '@prisma/client';
+import type { RolAdmin } from '../../../common/types/prisma-enums';
 
 export interface AdminJwtPayload {
   sub: string;

@@ -4,8 +4,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { EstadoDevolucion, TipoEntrega, TipoReembolso } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
+import { EstadoDevolucion, TipoEntrega, TipoReembolso } from '../../common/types/prisma-enums';
 import { AuditService } from '../../audit/audit.service';
 import type { AccessContext } from '../../common/decorators/access-context.decorator';
 import { PrismaService } from '../../infrastructure/database/prisma.service';
@@ -137,7 +136,7 @@ export class ReturnsService {
 
     const address =
       dto.method === 'TRANSPORTADORA'
-        ? (dto.address as unknown as Prisma.InputJsonObject)
+        ? (dto.address as unknown as Record<string, unknown>)
         : undefined;
 
     const updated = await this.returnsRepository.updateDelivery(

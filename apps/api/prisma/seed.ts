@@ -14,16 +14,21 @@
  *   PM-2024-003  juan.perez@outlook.com    → entregado hace 40 días (todas ventanas cerradas)
  */
 
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaMssql } from '@prisma/adapter-mssql';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 import { createHash } from 'crypto';
 import 'dotenv/config';
-import { Pool } from 'pg';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({
-  adapter: new PrismaPg(pool),
+  adapter: new PrismaMssql({
+    server: process.env.DB_HOST!,
+    port: parseInt(process.env.DB_PORT ?? '1433', 10),
+    user: process.env.DB_USER!,
+    password: process.env.DB_PASSWORD!,
+    database: process.env.DB_NAME!,
+    options: { trustServerCertificate: true },
+  }),
 });
 
 function emailHash(email: string): string {
@@ -51,36 +56,26 @@ async function main() {
   await prisma.usuarioAdmin.deleteMany();
 
   // ── 2. Tiendas ──────────────────────────────────────────────────────────
-  const tiendas = await Promise.all([
-    prisma.tienda.create({ data: { nombre: 'Permoda Andino', direccion: 'Cra 11 #82-71 Local 241, C.C. Andino', ciudad: 'Bogotá', departamento: 'Cundinamarca', telefono: '6017200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true } }),
-    prisma.tienda.create({ data: { nombre: 'Permoda Gran Estación', direccion: 'Av. calle 26 #62-47 Local 1-144', ciudad: 'Bogotá', departamento: 'Cundinamarca', telefono: '6017200002', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true } }),
-    prisma.tienda.create({ data: { nombre: 'Permoda El Tesoro', direccion: 'Cra 25A #1A Sur-45 Local 2-110, C.C. El Tesoro', ciudad: 'Medellín', departamento: 'Antioquia', telefono: '6044300001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true } }),
-    prisma.tienda.create({ data: { nombre: 'Permoda Chipichape', direccion: 'Calle 5N #1N-41 Local 214, C.C. Chipichape', ciudad: 'Cali', departamento: 'Valle del Cauca', telefono: '6023200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true } }),
-    prisma.tienda.create({ data: { nombre: 'Permoda Buenavista', direccion: 'Cra 53 #98-99 Local 243, C.C. Buenavista', ciudad: 'Barranquilla', departamento: 'Atlántico', telefono: '6053200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true } }),
-  ]);
+  const tiendasData = [
+    { nombre: 'Permoda Andino',        direccion: 'Cra 11 #82-71 Local 241, C.C. Andino',        ciudad: 'Bogotá',       departamento: 'Cundinamarca',   telefono: '6017200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true },
+    { nombre: 'Permoda Gran Estación', direccion: 'Av. calle 26 #62-47 Local 1-144',              ciudad: 'Bogotá',       departamento: 'Cundinamarca',   telefono: '6017200002', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true },
+    { nombre: 'Permoda El Tesoro',     direccion: 'Cra 25A #1A Sur-45 Local 2-110, C.C. El Tesoro', ciudad: 'Medellín',  departamento: 'Antioquia',      telefono: '6044300001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true },
+    { nombre: 'Permoda Chipichape',    direccion: 'Calle 5N #1N-41 Local 214, C.C. Chipichape',   ciudad: 'Cali',        departamento: 'Valle del Cauca', telefono: '6023200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true },
+    { nombre: 'Permoda Buenavista',    direccion: 'Cra 53 #98-99 Local 243, C.C. Buenavista',     ciudad: 'Barranquilla', departamento: 'Atlántico',     telefono: '6053200001', horario: 'Lun–Sáb 10am–9pm · Dom 11am–8pm', activo: true },
+  ];
+  const tiendas: Awaited<ReturnType<typeof prisma.tienda.create>>[] = [];
+  for (const data of tiendasData) {
+    tiendas.push(await prisma.tienda.create({ data }));
+  }
   console.log(`  ✓ ${tiendas.length} tiendas creadas`);
 
   // ── 3. Usuarios admin ───────────────────────────────────────────────────
-  const [adminUser, agenteUser] = await Promise.all([
-    prisma.usuarioAdmin.create({
-      data: {
-        nombre: 'Admin Permoda',
-        correo: 'admin@permoda.com.co',
-        passwordHash: await hash('Admin1234!', 12),
-        rol: 'ADMIN',
-        activo: true,
-      },
-    }),
-    prisma.usuarioAdmin.create({
-      data: {
-        nombre: 'Agente Operaciones',
-        correo: 'agente@permoda.com.co',
-        passwordHash: await hash('Agente1234!', 12),
-        rol: 'AGENTE',
-        activo: true,
-      },
-    }),
-  ]);
+  const adminUser = await prisma.usuarioAdmin.create({
+    data: { nombre: 'Admin Permoda', correo: 'admin@permoda.com.co', passwordHash: await hash('Admin1234!', 12), rol: 'ADMIN', activo: true },
+  });
+  const agenteUser = await prisma.usuarioAdmin.create({
+    data: { nombre: 'Agente Operaciones', correo: 'agente@permoda.com.co', passwordHash: await hash('Agente1234!', 12), rol: 'AGENTE', activo: true },
+  });
   console.log(`  ✓ Usuarios admin: ${adminUser.correo}, ${agenteUser.correo}`);
 
   // ── 4. Pedido 1 — Reciente (3 días) — ventanas 5d y 30d abiertas ────────
@@ -308,7 +303,7 @@ async function main() {
       items: {
         create: [{
           pedidoItemId: itemCamisa.id,
-          causales: ['SIZE_LARGE'],
+          causales: JSON.stringify(['SIZE_LARGE']),
           comentarios: 'La talla M me quedó muy grande, necesito S.',
           cantidad: 1,
           valorUnitario: 89900,

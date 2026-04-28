@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { EstadoDevolucion, EstadoPedido } from '@prisma/client';
+import { EstadoDevolucion, EstadoPedido } from '../../common/types/prisma-enums';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditService } from '../../audit/audit.service';

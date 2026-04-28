@@ -24,9 +24,6 @@ async function bootstrap() {
 
   prismaService.enableShutdownHooks(app);
 
-  await prismaService.checkConnection();
-  logger.log('Conexión a base de datos verificada');
-
   await app.listen(port);
   logger.log(`Aplicación corriendo en el puerto ${port}`);
 }

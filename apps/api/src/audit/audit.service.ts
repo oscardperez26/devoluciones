@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../infrastructure/database/prisma.service';
 
 interface AuditContext {
@@ -7,7 +6,7 @@ interface AuditContext {
   idRecurso?: string;
   ip?: string;
   userAgent?: string;
-  metadata?: Prisma.InputJsonObject;
+  metadata?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -24,7 +23,7 @@ export class AuditService {
           idRecurso: context?.idRecurso,
           ip: context?.ip,
           userAgent: context?.userAgent,
-          metadata: context?.metadata ?? undefined,
+          metadata: context?.metadata ? JSON.stringify(context.metadata) : null,
         },
       })
       .catch(() => {
