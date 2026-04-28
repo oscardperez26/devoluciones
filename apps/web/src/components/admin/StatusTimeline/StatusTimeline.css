@@ -1,0 +1,74 @@
+/* ── Lista de eventos ────────────────────────────────────────────────────── */
+
+.timeline {
+  position: relative;
+  border-left: 1px solid #e5e7eb;
+  margin-left: 0.75rem;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.timeline-entry {
+  margin-left: 1.5rem;
+}
+
+/* ── Punto indicador ─────────────────────────────────────────────────────── */
+
+.timeline-dot {
+  position: absolute;
+  left: -0.75rem;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #fff;
+  border: 2px solid #d1d5db;
+  border-radius: 9999px;
+}
+
+.timeline-dot-inner {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #9ca3af;
+}
+
+/* ── Tarjeta del evento ──────────────────────────────────────────────────── */
+
+.timeline-card {
+  padding: 0.75rem;
+  background-color: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.timeline-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-arrow {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.timeline-meta {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.timeline-note {
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0.25rem 0 0;
+  font-style: italic;
+}

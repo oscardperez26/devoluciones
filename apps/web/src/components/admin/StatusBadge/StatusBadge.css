@@ -1,0 +1,22 @@
+/* ── Badge base ──────────────────────────────────────────────────────────── */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ── Variantes por estado ────────────────────────────────────────────────── */
+
+.status-badge--borrador             { background-color: #f3f4f6; color: #4b5563; }
+.status-badge--enviada              { background-color: #dbeafe; color: #1d4ed8; }
+.status-badge--en-revision          { background-color: #fef9c3; color: #a16207; }
+.status-badge--aprobada             { background-color: #dcfce7; color: #15803d; }
+.status-badge--rechazada            { background-color: #fee2e2; color: #b91c1c; }
+.status-badge--producto-recibido    { background-color: #f3e8ff; color: #7e22ce; }
+.status-badge--reembolso-en-proceso { background-color: #ffedd5; color: #c2410c; }
+.status-badge--completada           { background-color: #d1fae5; color: #065f46; }
+.status-badge--default              { background-color: #f3f4f6; color: #4b5563; }
