@@ -1,7 +1,9 @@
+import './ReturnDetail.css';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { changeStatus, fetchEvidenceBlob, getReturnDetail, getTimeline } from '@/api/admin.api';
+import { AdminButton, AdminCard, AdminSectionTitle, AdminSelect } from '@/components/admin/ui';
 import StatusBadge from '@/components/admin/StatusBadge';
 import StatusTimeline from '@/components/admin/StatusTimeline';
 import type { AdminEvidence } from '@/types';
@@ -26,22 +28,10 @@ function EvidenceModal({ blobUrl, onClose }: { blobUrl: string; onClose: () => v
   }, [onClose]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={onClose}
-          className="absolute -top-10 right-0 text-white text-3xl font-bold hover:text-gray-300 leading-none"
-        >
-          ✕
-        </button>
-        <img
-          src={blobUrl}
-          alt="Evidencia"
-          className="w-full object-contain rounded-xl max-h-[85vh]"
-        />
+    <div className="evidence-modal" onClick={onClose}>
+      <div className="evidence-modal__inner" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="evidence-modal__close">✕</button>
+        <img src={blobUrl} alt="Evidencia" className="evidence-modal__img" />
       </div>
     </div>
   );
@@ -68,41 +58,22 @@ function EvidenceThumb({ returnId, evidence }: { returnId: string; evidence: Adm
     a.click();
   }
 
-  if (loadError) {
-    return (
-      <div className="w-64 h-64 bg-red-50 border border-red-200 rounded-xl flex items-center justify-center text-xs text-red-400 text-center p-2">
-        No disponible
-      </div>
-    );
-  }
-
-  if (!blobUrl) {
-    return <div className="w-64 h-64 bg-gray-100 rounded-xl animate-pulse" />;
-  }
+  if (loadError) return <div className="evidence-error">No disponible</div>;
+  if (!blobUrl)   return <div className="evidence-skeleton" />;
 
   return (
     <>
       {showModal && <EvidenceModal blobUrl={blobUrl} onClose={() => setShowModal(false)} />}
-      <div className="relative group flex-shrink-0">
+      <div className="evidence-thumb">
         <img
           src={blobUrl}
           alt="Evidencia"
-          className="w-64 h-64 object-cover rounded-xl cursor-pointer"
+          className="evidence-img"
           onClick={() => setShowModal(true)}
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-xl transition-all opacity-0 group-hover:opacity-100 flex flex-col items-center justify-end gap-1.5 pb-3">
-          <button
-            onClick={() => setShowModal(true)}
-            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-40 text-center"
-          >
-            🔍 Ver imagen
-          </button>
-          <button
-            onClick={handleDownload}
-            className="text-white text-xs font-semibold bg-black/70 px-3 py-1.5 rounded-full w-40 text-center"
-          >
-            ↓ Descargar
-          </button>
+        <div className="evidence-overlay">
+          <button onClick={() => setShowModal(true)} className="evidence-action-btn">🔍 Ver imagen</button>
+          <button onClick={handleDownload} className="evidence-action-btn">↓ Descargar</button>
         </div>
       </div>
     </>
@@ -140,107 +111,96 @@ export default function ReturnDetail() {
   });
 
   if (isLoading || !data) {
-    return <div className="p-6 text-gray-400 text-sm">{isLoading ? 'Cargando...' : 'No encontrada.'}</div>;
+    return <div className="detail-page">{isLoading ? 'Cargando...' : 'No encontrada.'}</div>;
   }
 
   const availableTransitions = TRANSITIONS[data.estado] ?? [];
 
   return (
-    <div className="p-6 max-w-4xl">
-      <button
-        onClick={() => navigate(-1)}
-        className="text-sm text-gray-500 hover:text-gray-700 mb-4 flex items-center gap-1"
-      >
-        ← Volver
-      </button>
+    <div className="detail-page">
+      <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="detail-header">
         <div>
-          <h1 className="text-xl font-bold text-[#111827]">{data.numeroTicket ?? 'Sin ticket'}</h1>
-          <p className="text-sm text-gray-500">{data.pedido.nombreCliente} · Pedido {data.pedido.numeroPedido}</p>
+          <h1 className="detail-title">{data.numeroTicket ?? 'Sin ticket'}</h1>
+          <p className="detail-subtitle">{data.pedido.nombreCliente} · Pedido {data.pedido.numeroPedido}</p>
         </div>
         <StatusBadge status={data.estado} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: items + info */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="detail-grid">
+        <div className="col-main">
 
-          {/* Summary */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="font-semibold text-sm text-gray-700 mb-3">Información general</h2>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <dt className="text-gray-500">Total</dt>
-              <dd className="font-medium">${data.totalReembolso.toLocaleString('es-CO')}</dd>
-              <dt className="text-gray-500">Entrega</dt>
+          {/* Información general */}
+          <AdminCard>
+            <AdminSectionTitle>Información general</AdminSectionTitle>
+            <dl className="info-grid">
+              <dt>Total</dt>
+              <dd>${data.totalReembolso.toLocaleString('es-CO')}</dd>
+              <dt>Entrega</dt>
               <dd>{data.metodoEntrega ?? '—'}</dd>
-              <dt className="text-gray-500">Reembolso</dt>
+              <dt>Reembolso</dt>
               <dd>{data.metodoReembolso ?? '—'}</dd>
-              <dt className="text-gray-500">Creado</dt>
+              <dt>Creado</dt>
               <dd>{new Date(data.creadoEn).toLocaleString('es-CO')}</dd>
               {data.enviadaEn && (
                 <>
-                  <dt className="text-gray-500">Enviado</dt>
+                  <dt>Enviado</dt>
                   <dd>{new Date(data.enviadaEn).toLocaleString('es-CO')}</dd>
                 </>
               )}
             </dl>
             {data.notas && (
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-1">Notas</p>
-                <p className="text-sm text-gray-700">{data.notas}</p>
+              <div className="info-notes">
+                <p className="info-notes-label">Notas</p>
+                <p className="info-notes-text">{data.notas}</p>
               </div>
             )}
-          </div>
+          </AdminCard>
 
           {/* Bono Ogloba */}
           {data.codigoBono && (
-            <div className="bg-green-50 border-2 border-green-500 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🎁</span>
-                <h2 className="font-semibold text-sm text-green-800">Bono Ogloba emitido</h2>
+            <div className="bono-card">
+              <div className="bono-header">
+                <span>🎁</span>
+                <h2 className="bono-title">Bono Ogloba emitido</h2>
               </div>
-              <p className="text-xs text-green-700 mb-2">Este código fue enviado al correo del cliente.</p>
-              <div className="bg-white border border-green-200 rounded-lg px-4 py-3 text-center">
-                <p className="font-mono font-bold text-xl tracking-widest text-[#111827]">{data.codigoBono}</p>
+              <p className="bono-subtitle">Este código fue enviado al correo del cliente.</p>
+              <div className="bono-code-box">
+                <p className="bono-code">{data.codigoBono}</p>
               </div>
             </div>
           )}
 
-          {/* Items */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="font-semibold text-sm text-gray-700 mb-3">Productos ({data.items.length})</h2>
-            <div className="space-y-4">
+          {/* Productos */}
+          <AdminCard>
+            <AdminSectionTitle>Productos ({data.items.length})</AdminSectionTitle>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {data.items.map((item) => (
-                <div key={item.id} className="border border-gray-100 rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
+                <div key={item.id} className="item-card">
+                  <div className="item-header">
                     <div>
-                      <p className="font-medium text-sm">{item.pedidoItem.nombreProducto}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="item-name">{item.pedidoItem.nombreProducto}</p>
+                      <p className="item-sku">
                         {item.pedidoItem.sku}
                         {item.pedidoItem.talla && ` · T. ${item.pedidoItem.talla}`}
                         {item.pedidoItem.color && ` · ${item.pedidoItem.color}`}
                       </p>
                     </div>
-                    <span className="text-sm font-semibold">${Number(item.valorUnitario).toLocaleString('es-CO')}</span>
+                    <span className="item-price">${Number(item.valorUnitario).toLocaleString('es-CO')}</span>
                   </div>
-                  <div className="flex flex-wrap gap-1 mb-2">
+                  <div className="item-causales">
                     {item.causales.map((c) => (
-                      <span key={c} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{c}</span>
+                      <span key={c} className="causal-tag">{c}</span>
                     ))}
                   </div>
                   {item.comentarios && (
-                    <p className="text-xs text-gray-500 mb-2 italic">"{item.comentarios}"</p>
+                    <p className="item-comments">"{item.comentarios}"</p>
                   )}
-
-                  {/* Evidencias */}
                   {item.evidencias.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <p className="text-xs font-medium text-gray-600 mb-3">
-                        📷 Evidencias ({item.evidencias.length})
-                      </p>
-                      <div className="flex flex-wrap gap-3">
+                    <div className="evidences-section">
+                      <p className="evidences-label">📷 Evidencias ({item.evidencias.length})</p>
+                      <div className="evidences-grid">
                         {item.evidencias.map((ev) => (
                           <EvidenceThumb key={ev.id} returnId={data.id} evidence={ev} />
                         ))}
@@ -250,54 +210,49 @@ export default function ReturnDetail() {
                 </div>
               ))}
             </div>
-          </div>
+          </AdminCard>
         </div>
 
-        {/* Right: actions + timeline */}
-        <div className="space-y-4">
-          {/* Change status */}
+        <div className="col-side">
+          {/* Cambiar estado */}
           {availableTransitions.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h2 className="font-semibold text-sm text-gray-700 mb-3">Cambiar estado</h2>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#111827]"
-              >
+            <AdminCard>
+              <AdminSectionTitle>Cambiar estado</AdminSectionTitle>
+              <AdminSelect value={newStatus} onChange={setNewStatus} className="status-select">
                 <option value="">Selecciona nuevo estado</option>
                 {availableTransitions.map((s) => (
                   <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
                 ))}
-              </select>
+              </AdminSelect>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Notas (opcional)"
                 rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#111827] resize-none"
+                className="status-notes"
               />
-              <button
+              <AdminButton
                 onClick={() => mutation.mutate()}
                 disabled={!newStatus || mutation.isPending}
-                className="w-full bg-[#111827] hover:bg-gray-800 disabled:opacity-50 text-white text-sm font-semibold rounded-lg py-2.5 transition-colors"
+                className="btn-full btn-lg"
               >
                 {mutation.isPending ? 'Guardando...' : 'Actualizar estado'}
-              </button>
+              </AdminButton>
               {mutation.isError && (
-                <p className="text-xs text-red-600 mt-2">Error al actualizar. Intenta de nuevo.</p>
+                <p className="status-error">Error al actualizar. Intenta de nuevo.</p>
               )}
-            </div>
+            </AdminCard>
           )}
 
-          {/* Timeline */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="font-semibold text-sm text-gray-700 mb-3">Historial</h2>
+          {/* Historial */}
+          <AdminCard>
+            <AdminSectionTitle>Historial</AdminSectionTitle>
             {timeline?.length ? (
               <StatusTimeline entries={timeline} />
             ) : (
-              <p className="text-xs text-gray-400">Sin historial aún.</p>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>Sin historial aún.</p>
             )}
-          </div>
+          </AdminCard>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
+import './AdminLogin.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminLogin } from '@/api/admin.api';
+import { AdminButton, AdminInput } from '@/components/admin/ui';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -9,7 +11,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -26,40 +28,18 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        <h1 className="text-xl font-bold text-[#111827] mb-1">Panel de Operaciones</h1>
-        <p className="text-sm text-gray-500 mb-6">Ingresa tus credenciales para acceder.</p>
+    <div className="login-page">
+      <div className="login-card">
+        <h1 className="login-title">Panel de Operaciones</h1>
+        <p className="login-subtitle">Ingresa tus credenciales para acceder.</p>
 
-        <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
-              required
-            />
-          </div>
-          {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#111827] hover:bg-gray-800 disabled:opacity-60 text-white font-semibold rounded-lg py-2.5 transition-colors"
-          >
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="login-form">
+          <AdminInput label="Correo" type="email" value={email} onChange={setEmail} required />
+          <AdminInput label="Contraseña" type="password" value={password} onChange={setPassword} required />
+          {error && <p className="login-error">{error}</p>}
+          <AdminButton type="submit" disabled={loading} className="btn-full btn-lg">
             {loading ? 'Ingresando...' : 'Ingresar'}
-          </button>
+          </AdminButton>
         </form>
       </div>
     </div>

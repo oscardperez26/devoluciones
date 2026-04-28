@@ -1,0 +1,310 @@
+/* ── Página ───────────────────────────────────────────────────────────────── */
+
+.rules-page {
+  padding: 1.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.rules-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.rules-header-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.rules-header-text p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.125rem 0 0;
+}
+
+/* ── Formulario nueva regla ──────────────────────────────────────────────── */
+
+.new-rule-form {
+  margin-bottom: 1.5rem;
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border: 1px solid #bfdbfe;
+  padding: 1.25rem;
+}
+
+.new-rule-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 1rem;
+}
+
+.new-rule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.form-input {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  background-color: #fff;
+}
+
+.form-input--mono {
+  font-family: monospace;
+}
+
+.form-select {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background-color: #fff;
+  outline: none;
+}
+
+.form-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-checkbox-label input {
+  width: 1rem;
+  height: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* ── Grupos de reglas ────────────────────────────────────────────────────── */
+
+.rule-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rule-group {
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  overflow: hidden;
+}
+
+.rule-group-header {
+  padding: 0.75rem 1.25rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.rule-group-header h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+/* ── Fila de regla ───────────────────────────────────────────────────────── */
+
+.rule-row {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #f9fafb;
+  transition: background-color 0.15s;
+}
+
+.rule-row:last-child {
+  border-bottom: none;
+}
+
+.rule-row:hover {
+  background-color: rgb(249 250 251 / 0.5);
+}
+
+/* Toggle on/off */
+.toggle {
+  position: relative;
+  width: 2.5rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s;
+  outline: none;
+}
+
+.toggle--on  { background-color: var(--color-primary); }
+.toggle--off { background-color: #e5e7eb; }
+.toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.toggle__knob {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: transform 0.15s;
+}
+
+.toggle--on .toggle__knob {
+  transform: translateX(1.25rem);
+}
+
+/* Info de la regla */
+.rule-info { flex: 1; min-width: 0; }
+
+.rule-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.rule-name--active   { color: var(--color-primary); }
+.rule-name--inactive { color: #9ca3af; }
+
+.rule-inactive-badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.rule-code {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-family: monospace;
+  margin: 0.125rem 0 0;
+}
+
+/* Plazo */
+.rule-plazo {
+  text-align: center;
+  flex-shrink: 0;
+  width: 4rem;
+}
+
+.rule-plazo-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.rule-plazo-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Toggle evidencia */
+.evidence-toggle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: background-color 0.15s;
+}
+
+.evidence-toggle--on  { background-color: #fef3c7; color: #b45309; }
+.evidence-toggle--on:hover  { background-color: #fde68a; }
+.evidence-toggle--off { background-color: #f3f4f6; color: #6b7280; }
+.evidence-toggle--off:hover { background-color: #e5e7eb; }
+.evidence-toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Botón editar */
+.edit-btn {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.edit-btn:hover { color: #374151; }
+
+/* Fila de edición */
+.rule-row--editing {
+  padding: 1rem 1.25rem;
+  background-color: rgb(239 246 255 / 0.4);
+  border-bottom: 1px solid #f9fafb;
+}
+
+.rule-row--editing:last-child {
+  border-bottom: none;
+}
+
+.rule-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rule-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Input compacto para edición inline */
+.form-input--compact {
+  padding: 0.375rem 0.75rem;
+}
+
+.form-select--compact {
+  padding: 0.375rem 0.75rem;
+}

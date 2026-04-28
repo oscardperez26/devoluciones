@@ -1,6 +1,8 @@
+import './ReturnsList.css';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { listReturns } from '@/api/admin.api';
+import { AdminCard } from '@/components/admin/ui';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { useAdminStore } from '@/store/admin.store';
 
@@ -28,27 +30,27 @@ export default function ReturnsList() {
   });
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-[#111827]">Devoluciones</h1>
+    <div className="returns-page">
+      <div className="page-header">
+        <h1 className="page-title">Devoluciones</h1>
         {data?.pagination && (
-          <p className="text-sm text-gray-500">{data.pagination.total} total</p>
+          <span className="page-count">{data.pagination.total} total</span>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4 flex flex-wrap gap-3">
+      {/* Filtros */}
+      <AdminCard className="filter-bar">
         <input
           type="text"
           placeholder="Buscar por ticket o cliente..."
           value={filters.search}
           onChange={(e) => setFilter('search', e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827] min-w-48"
+          className="filter-input filter-input--wide"
         />
         <select
           value={filters.status}
           onChange={(e) => setFilter('status', e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
+          className="filter-input"
         >
           {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
         </select>
@@ -56,83 +58,74 @@ export default function ReturnsList() {
           type="date"
           value={filters.dateFrom}
           onChange={(e) => setFilter('dateFrom', e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
+          className="filter-input"
         />
         <input
           type="date"
           value={filters.dateTo}
           onChange={(e) => setFilter('dateTo', e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
+          className="filter-input"
         />
-        <button
-          onClick={resetFilters}
-          className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-        >
+        <button onClick={resetFilters} className="filter-clear">
           Limpiar
         </button>
-      </div>
+      </AdminCard>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      {/* Tabla */}
+      <AdminCard noPadding>
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400 text-sm">Cargando...</div>
+          <div className="table-empty">Cargando...</div>
         ) : !data?.returns.length ? (
-          <div className="p-8 text-center text-gray-400 text-sm">No hay devoluciones con los filtros actuales.</div>
+          <div className="table-empty">No hay devoluciones con los filtros actuales.</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+          <table className="returns-table">
+            <thead>
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Ticket</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Estado</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Ítems</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Total</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                <th>Ticket</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Ítems</th>
+                <th className="col-right">Total</th>
+                <th>Fecha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {data.returns.map((r) => (
-                <tr
-                  key={r.id}
-                  onClick={() => navigate(`/admin/devoluciones/${r.id}`)}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  <td className="px-4 py-3 font-mono text-xs font-medium">{r.numeroTicket ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium">{r.pedido.nombreCliente}</p>
-                    <p className="text-xs text-gray-500">{r.pedido.numeroPedido}</p>
+                <tr key={r.id} onClick={() => navigate(`/admin/devoluciones/${r.id}`)}>
+                  <td className="cell-ticket">{r.numeroTicket ?? '—'}</td>
+                  <td>
+                    <p className="cell-client-name">{r.pedido.nombreCliente}</p>
+                    <p className="cell-client-order">{r.pedido.numeroPedido}</p>
                   </td>
-                  <td className="px-4 py-3"><StatusBadge status={r.estado} /></td>
-                  <td className="px-4 py-3 text-gray-600">{r.itemCount}</td>
-                  <td className="px-4 py-3 text-right font-medium">${r.totalReembolso.toLocaleString('es-CO')}</td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {new Date(r.creadoEn).toLocaleDateString('es-CO')}
-                  </td>
+                  <td><StatusBadge status={r.estado} /></td>
+                  <td>{r.itemCount}</td>
+                  <td className="col-right">${r.totalReembolso.toLocaleString('es-CO')}</td>
+                  <td className="cell-date">{new Date(r.creadoEn).toLocaleDateString('es-CO')}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </div>
+      </AdminCard>
 
-      {/* Pagination */}
+      {/* Paginación */}
       {data?.pagination && data.pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-gray-500">
+        <div className="pagination">
+          <span className="pagination-info">
             Página {filters.page} de {data.pagination.totalPages}
-          </p>
-          <div className="flex gap-2">
+          </span>
+          <div className="pagination-controls">
             <button
               onClick={() => setFilter('page', filters.page - 1)}
               disabled={filters.page <= 1}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="pagination-btn"
             >
               ← Anterior
             </button>
             <button
               onClick={() => setFilter('page', filters.page + 1)}
               disabled={filters.page >= data.pagination.totalPages}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              className="pagination-btn"
             >
               Siguiente →
             </button>
