@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getSessionOrder } from '@/api/orders.api';
 import { createOrUpdateDraft } from '@/api/returns.api';
+import { ErrorMessage, PrimaryButton, WizardPage } from '@/components/ui';
 import EvidenceUpload from '@/components/wizard/EvidenceUpload';
 import StepIndicator from '@/components/wizard/StepIndicator';
 import type { SelectedItem } from '@/store/wizard.store';
@@ -219,9 +220,8 @@ export default function Step2Products() {
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Cargando productos...</p></div>;
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <StepIndicator current={2} />
+    <WizardPage>
+      <StepIndicator current={2} />
 
         {phase === 'selecting' ? (
           <>
@@ -311,15 +311,13 @@ export default function Step2Products() {
               })}
             </div>
 
-            {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
+            {error && <ErrorMessage message={error} />}
 
-            <button
-              onClick={() => { void saveDraft(); }}
-              disabled={saving}
-              className="w-full mt-6 bg-[#111827] hover:bg-gray-800 disabled:opacity-60 text-white font-semibold rounded-xl py-3 transition-colors"
-            >
-              {saving ? 'Guardando...' : 'Guardar ítems →'}
-            </button>
+            <div className="mt-6">
+              <PrimaryButton disabled={saving} onClick={() => { void saveDraft(); }}>
+                {saving ? 'Guardando...' : 'Guardar ítems →'}
+              </PrimaryButton>
+            </div>
           </>
         ) : (
           <>
@@ -361,7 +359,6 @@ export default function Step2Products() {
             <p className="text-xs text-center text-gray-400 mt-6">Confirma la foto de cada producto para continuar.</p>
           </>
         )}
-      </div>
-    </div>
+    </WizardPage>
   );
 }
