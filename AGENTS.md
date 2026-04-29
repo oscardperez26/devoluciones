@@ -6,7 +6,7 @@ This repository contains V1 of a returns-management system.
 ## Mandatory stack
 - NestJS backend
 - React + Vite frontend
-- PostgreSQL + Prisma
+- SQL Server + Prisma
 - Redis + BullMQ
 - Zod validation
 - Zustand + TanStack Query

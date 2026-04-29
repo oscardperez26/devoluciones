@@ -6,7 +6,7 @@ Implementar V1 del sistema de devoluciones según arquitectura v3.
 ## Stack obligatorio
 - Backend: NestJS + TypeScript
 - Frontend: React + Vite + TypeScript
-- DB: PostgreSQL
+- DB: SQL Server
 - ORM: Prisma
 - Cache: Redis
 - Queues: BullMQ

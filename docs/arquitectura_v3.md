@@ -3,7 +3,7 @@ SISTEMA DE GESTIÓN DE DEVOLUCIONES
 Arquitectura Enterprise v3.0
 
 
-NestJS · React · Vite · TypeScript · PostgreSQL · Redis · BullMQ
+NestJS · React · Vite · TypeScript · SQL Server · Redis · BullMQ
 Versión
 3.0.0	Estado
 Aprobación	Audiencia
@@ -773,10 +773,12 @@ Audit log completo	Inmutable	Cada cambio de estado, exportación o modificación
  
 
 9	Esquema de Base de Datos
-PostgreSQL — tablas, tipos enumerados, índices
+SQL Server — tablas, tipos enumerados, índices
 
-Schema PostgreSQL completo
--- Tipos enumerados PostgreSQL
+Schema SQL de referencia (implementado con Prisma sobre SQL Server)
+-- Nota: este bloque describe el modelo logico. En la implementacion actual con Prisma + SQL Server,
+-- los estados/enum se manejan como cadenas controladas por la aplicacion y validacion backend.
+-- Tipos enumerados (referencia logica)
 CREATE TYPE order_status    AS ENUM ('PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELLED');
 CREATE TYPE return_status   AS ENUM ('DRAFT','SUBMITTED','REVIEWING','APPROVED',
                                      'PRODUCT_RECEIVED','REFUND_PROCESSING','COMPLETED','REJECTED');
@@ -861,7 +863,7 @@ Stores	StoresService	Búsqueda cascada departamento→ciudad→tienda. Caché Re
 Admin	AdminService básico	Lista de devoluciones, detalle, cambio de estado manual, notas internas.
 Audit	AuditService	Log de accesos, cambios de estado y acciones del panel. Solo escritura.
 Frontend	React + Vite	Wizard completo (pasos 1-5 + confirmación) + panel admin básico.
-BD	PostgreSQL + Prisma	Schema completo con migraciones. Seed de tiendas y pedidos de prueba.
+BD	SQL Server + Prisma	Schema completo con migraciones. Seed de tiendas y pedidos de prueba.
 
 Lo que NO entra en V1 (sobreingeniería para V1)
 •	RefundService automatizado — en V1 el agente cambia el estado manualmente a COMPLETED
@@ -909,4 +911,5 @@ Portal cliente con historial	—	—	✔ Incluido
 Multi-tenant	—	—	✔ Incluido
 
 ✔  V1 en producción es el objetivo. V2 y V3 se construyen sobre V1 sin romper nada — gracias a la arquitectura modular de NestJS y la separación clara de responsabilidades entre servicios.
+
 

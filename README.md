@@ -3,7 +3,7 @@
 Monorepo fullstack:
 - Backend: NestJS + TypeScript
 - Frontend: React + Vite + TypeScript
-- DB: PostgreSQL
+- DB: SQL Server
 - ORM: Prisma
 - Cache/queues: Redis + BullMQ
 
