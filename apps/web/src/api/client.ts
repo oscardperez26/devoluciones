@@ -2,8 +2,18 @@ import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import { useWizardStore } from '@/store/wizard.store';
 
-export const wizardClient = axios.create({ baseURL: '/api/v1' });
-export const adminClient = axios.create({ baseURL: '/api/v1' });
+const envApiUrl = import.meta.env.VITE_API_URL?.trim() ?? '';
+const normalizedEnvApiUrl = envApiUrl.endsWith('/') ? envApiUrl.slice(0, -1) : envApiUrl;
+const API_BASE_URL = normalizedEnvApiUrl ? `${normalizedEnvApiUrl}/api/v1` : '/api/v1';
+
+export const wizardClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+export const adminClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
 
 wizardClient.interceptors.request.use((config) => {
   const token = useWizardStore.getState().sessionToken;

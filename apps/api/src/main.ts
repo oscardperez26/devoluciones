@@ -17,6 +17,15 @@ async function bootstrap() {
   const prismaService = app.get(PrismaService);
   const port = configService.get<number>('PORT') ?? 3001;
 
+  app.enableCors({
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://oscardperez26.github.io',
+    ],
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI });
   app.useGlobalFilters(new AllExceptionsFilter());

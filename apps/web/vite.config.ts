@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/devoluciones/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

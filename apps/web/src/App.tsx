@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import RequireAdminAuth from '@/components/RequireAdminAuth';
 import RequireSession from '@/components/RequireSession';
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -16,7 +16,7 @@ import Step5Refund from '@/pages/wizard/Step5Refund';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Step1Entry />} />
         <Route path="/paso-2" element={<RequireSession><Step2Products /></RequireSession>} />
@@ -33,6 +33,6 @@ export default function App() {
           <Route path="reglas" element={<ReturnRules />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
