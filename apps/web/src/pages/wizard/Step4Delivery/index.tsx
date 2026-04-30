@@ -1,7 +1,7 @@
 import './Step4Delivery.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ErrorMessage, FormInput, PrimaryButton, StepCard, StepSubtitle, StepTitle, WizardPage } from '@/components/ui';
+import { ErrorMessage, FormInput } from '@/components/ui';
 import StorePicker from '@/components/wizard/StorePicker';
 import StepIndicator from '@/components/wizard/StepIndicator';
 import { setDeliveryCarrier as apiSetCarrier, setDeliveryStore as apiSetStore } from '@/api/returns.api';
@@ -62,59 +62,121 @@ export default function Step4Delivery() {
   }
 
   return (
-    <WizardPage>
-      <StepIndicator current={4} />
-      <StepTitle>Método de entrega</StepTitle>
-      <StepSubtitle>¿Cómo nos entregas el producto?</StepSubtitle>
+    <div className="s4-root">
 
-      <div className="delivery-methods">
-        {(['TIENDA', 'TRANSPORTADORA'] as Method[]).map((m) => (
+      {/* ── Header fijo ── */}
+      <header className="s4-header">
+        <div className="s4-header-inner">
+          <StepIndicator current={4} />
+        </div>
+      </header>
+
+      {/* ── Contenido scrolleable ── */}
+      <main className="s4-body">
+
+        <div className="s4-title-block">
+          <h2 className="s4-title">Método de entrega</h2>
+          <p className="s4-subtitle">¿Cómo nos entregas el producto?</p>
+        </div>
+
+        {/* Opciones de método */}
+        <div className="s4-methods">
+          {(['TIENDA', 'TRANSPORTADORA'] as Method[]).map((m) => {
+            const isOn = method === m;
+            return (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMethod(m)}
+                className={`s4-method ${isOn ? 's4-method--on' : ''}`}
+              >
+                <span className="s4-method-icon">{m === 'TIENDA' ? '🏪' : '🚚'}</span>
+                <p className="s4-method-name">
+                  {m === 'TIENDA' ? 'Entrega en tienda' : 'Recogida en domicilio'}
+                </p>
+                <p className="s4-method-desc">
+                  {m === 'TIENDA'
+                    ? 'Lleva el producto a nuestra tienda más cercana'
+                    : 'Una transportadora recoge el paquete en tu dirección'}
+                </p>
+                {isOn && (
+                  <span className="s4-method-badge">✓ Seleccionado</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Detalle tienda */}
+        {method === 'TIENDA' && (
+          <div className="s4-card">
+            <p className="s4-card-label">Selecciona la tienda</p>
+            <StorePicker onSelect={setSelectedStore} selectedStoreId={selectedStore?.id ?? null} />
+          </div>
+        )}
+
+        {/* Detalle transportadora */}
+        {method === 'TRANSPORTADORA' && (
+          <div className="s4-card">
+            <p className="s4-card-label">Dirección de recogida</p>
+            <div className="s4-address-form">
+              {ADDRESS_FIELDS.map(({ field, label }) => (
+                <FormInput
+                  key={field}
+                  label={label}
+                  value={addr[field]}
+                  onChange={(v) => handleAddrChange(field, v)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {error && <ErrorMessage message={error} />}
+
+      </main>
+
+      {/* ── Barra inferior fija ── */}
+      <div className="s4-action-bar">
+        <div className="s4-action-inner">
           <button
-            key={m}
             type="button"
-            onClick={() => setMethod(m)}
-            className={`delivery-method-btn ${method === m ? 'delivery-method-btn--selected' : ''}`}
+            className="s4-back-btn"
+            onClick={() => navigate('/paso-3')}
           >
-            <span className="delivery-method-icon">{m === 'TIENDA' ? '🏪' : '🚚'}</span>
-            <p className="delivery-method-name">{m === 'TIENDA' ? 'Entrega en tienda' : 'Recogida en domicilio'}</p>
-            <p className="delivery-method-desc">
-              {m === 'TIENDA' ? 'Lleva el producto a nuestra tienda más cercana' : 'Una transportadora recoge el paquete en tu dirección'}
-            </p>
+            <svg viewBox="0 0 20 20" fill="none" className="s4-back-svg">
+              <path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Volver
           </button>
-        ))}
+
+          <div className="s4-action-info">
+            {!method && (
+              <span className="s4-action-hint">Selecciona un método de entrega</span>
+            )}
+            {method === 'TIENDA' && !selectedStore && (
+              <span className="s4-action-hint">Elige la tienda más cercana</span>
+            )}
+            {method === 'TIENDA' && selectedStore && (
+              <span className="s4-action-ready">✓ {selectedStore.name}</span>
+            )}
+            {method === 'TRANSPORTADORA' && (
+              <span className="s4-action-hint">Completa tu dirección de recogida</span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            disabled={!method || saving}
+            className="s4-continue-btn"
+            onClick={() => { void handleContinue(); }}
+          >
+            {saving ? 'Guardando...' : 'Continuar →'}
+          </button>
+        </div>
       </div>
 
-      {method === 'TIENDA' && (
-        <StepCard>
-          <p className="address-section-label">Selecciona la tienda</p>
-          <StorePicker onSelect={setSelectedStore} selectedStoreId={selectedStore?.id ?? null} />
-        </StepCard>
-      )}
-
-      {method === 'TRANSPORTADORA' && (
-        <StepCard>
-          <p className="address-section-label">Dirección de recogida</p>
-          <div className="address-form">
-            {ADDRESS_FIELDS.map(({ field, label }) => (
-              <FormInput
-                key={field}
-                label={label}
-                value={addr[field]}
-                onChange={(v) => handleAddrChange(field, v)}
-              />
-            ))}
-          </div>
-        </StepCard>
-      )}
-
-      <ErrorMessage message={error} />
-
-      <PrimaryButton
-        disabled={!method || saving}
-        onClick={() => { void handleContinue(); }}
-      >
-        {saving ? 'Guardando...' : 'Continuar →'}
-      </PrimaryButton>
-    </WizardPage>
+    </div>
   );
 }
