@@ -136,6 +136,63 @@
   align-self: flex-start;
 }
 
+/* ── Resumen de tienda elegida (clicable para cambiar) ── */
+.s4-store-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  width: 100%;
+  background: #f0effe;
+  border: 1.5px solid #4f46e5;
+  border-radius: 1rem;
+  padding: 1rem 1.125rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .12s, box-shadow .12s;
+  box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+}
+
+.s4-store-summary:hover { background: #e8e4fd; }
+
+.s4-store-summary-icon { font-size: 1.75rem; line-height: 1; flex-shrink: 0; }
+
+.s4-store-summary-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.s4-store-summary-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin: 0;
+}
+
+.s4-store-summary-addr {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.s4-store-summary-hours {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.s4-store-summary-change {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #4f46e5;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+}
+
 /* ── Tarjeta de detalle (tienda / dirección) ── */
 .s4-card {
   background: #fff;

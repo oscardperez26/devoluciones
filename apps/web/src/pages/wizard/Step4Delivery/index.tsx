@@ -28,6 +28,7 @@ export default function Step4Delivery() {
   const { returnId, setDeliveryStore: storeDelivery, setDeliveryCarrier: storeSetCarrier, goToStep } = useWizardStore();
   const [method, setMethod] = useState<Method | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [storeModalOpen, setStoreModalOpen] = useState(false);
   const [addr, setAddr] = useState<CarrierAddress>(emptyAddress);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -87,7 +88,10 @@ export default function Step4Delivery() {
               <button
                 key={m}
                 type="button"
-                onClick={() => setMethod(m)}
+                onClick={() => {
+                  setMethod(m);
+                  if (m === 'TIENDA') setStoreModalOpen(true);
+                }}
                 className={`s4-method ${isOn ? 's4-method--on' : ''}`}
               >
                 <span className="s4-method-icon">{m === 'TIENDA' ? '🏪' : '🚚'}</span>
@@ -107,12 +111,23 @@ export default function Step4Delivery() {
           })}
         </div>
 
-        {/* Detalle tienda */}
-        {method === 'TIENDA' && (
-          <div className="s4-card">
-            <p className="s4-card-label">Selecciona la tienda</p>
-            <StorePicker onSelect={setSelectedStore} selectedStoreId={selectedStore?.id ?? null} />
-          </div>
+        {/* Tienda elegida — resumen clicable para cambiar */}
+        {method === 'TIENDA' && selectedStore && (
+          <button
+            type="button"
+            className="s4-store-summary"
+            onClick={() => setStoreModalOpen(true)}
+          >
+            <span className="s4-store-summary-icon">🏪</span>
+            <div className="s4-store-summary-info">
+              <p className="s4-store-summary-name">{selectedStore.nombre}</p>
+              <p className="s4-store-summary-addr">{selectedStore.direccion}</p>
+              {selectedStore.horario && (
+                <p className="s4-store-summary-hours">{selectedStore.horario}</p>
+              )}
+            </div>
+            <span className="s4-store-summary-change">Cambiar ›</span>
+          </button>
         )}
 
         {/* Detalle transportadora */}
@@ -159,7 +174,7 @@ export default function Step4Delivery() {
               <span className="s4-action-hint">Elige la tienda más cercana</span>
             )}
             {method === 'TIENDA' && selectedStore && (
-              <span className="s4-action-ready">✓ {selectedStore.name}</span>
+              <span className="s4-action-ready">✓ {selectedStore.nombre}</span>
             )}
             {method === 'TRANSPORTADORA' && (
               <span className="s4-action-hint">Completa tu dirección de recogida</span>
@@ -168,7 +183,7 @@ export default function Step4Delivery() {
 
           <button
             type="button"
-            disabled={!method || saving}
+            disabled={!method || saving || (method === 'TIENDA' && !selectedStore)}
             className="s4-continue-btn"
             onClick={() => { void handleContinue(); }}
           >
@@ -176,6 +191,15 @@ export default function Step4Delivery() {
           </button>
         </div>
       </div>
+
+      {/* Modal de selección de tienda */}
+      {storeModalOpen && (
+        <StorePicker
+          onSelect={(store) => { setSelectedStore(store); }}
+          onClose={() => setStoreModalOpen(false)}
+          selectedStoreId={selectedStore?.id ?? null}
+        />
+      )}
 
     </div>
   );
