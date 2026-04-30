@@ -63,25 +63,29 @@ export class AdminReturnsService {
       }),
     };
 
-    const returns = await this.prisma.devolucion.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { creadoEn: 'desc' },
-      select: {
-        id: true,
-        numeroTicket: true,
-        estado: true,
-        totalReembolso: true,
-        metodoEntrega: true,
-        metodoReembolso: true,
-        creadoEn: true,
-        enviadaEn: true,
-        pedido: { select: { numeroPedido: true, nombreCliente: true } },
-        items: { select: { id: true } },
-      },
-    });
-    const total = await this.prisma.devolucion.count({ where });
+    const returns = await this.prisma.run(() =>
+      this.prisma.devolucion.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { creadoEn: 'desc' },
+        select: {
+          id: true,
+          numeroTicket: true,
+          estado: true,
+          totalReembolso: true,
+          metodoEntrega: true,
+          metodoReembolso: true,
+          creadoEn: true,
+          enviadaEn: true,
+          pedido: { select: { numeroPedido: true, nombreCliente: true } },
+          items: { select: { id: true } },
+        },
+      }),
+    );
+    const total = await this.prisma.run(() =>
+      this.prisma.devolucion.count({ where }),
+    );
 
     return {
       returns: returns.map((r) => ({
