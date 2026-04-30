@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { CarrierAddress, DraftItem } from '@/types';
 
 export interface SelectedItem extends DraftItem {
@@ -35,47 +36,14 @@ interface WizardState {
   reset: () => void;
 }
 
-export const useWizardStore = create<WizardState>((set) => ({
-  sessionToken: null,
-  expiresAt: null,
-  orderId: null,
-  returnId: null,
-  currentStep: 1,
-  selectedItems: [],
-  deliveryMethod: null,
-  storeId: null,
-  carrierAddress: null,
-  refundMethod: null,
-  ticketNumber: null,
-  totalRefund: 0,
-  confirmationEmail: null,
-
-  setSession: (token, expiresAt, orderId) =>
-    set({ sessionToken: token, expiresAt, orderId, currentStep: 2 }),
-
-  setReturnId: (id, items) => set({ returnId: id, selectedItems: items }),
-
-  setViewReturnId: (id) => set({ returnId: id }),
-
-  setSelectedItems: (items) => set({ selectedItems: items }),
-
-  setDeliveryStore: (storeId) => set({ deliveryMethod: 'TIENDA', storeId, carrierAddress: null }),
-
-  setDeliveryCarrier: (address) =>
-    set({ deliveryMethod: 'TRANSPORTADORA', carrierAddress: address, storeId: null }),
-
-  setRefundMethod: (method) => set({ refundMethod: method }),
-
-  setConfirmation: (ticketNumber, totalRefund, confirmationEmail) =>
-    set({ ticketNumber, totalRefund, confirmationEmail }),
-
-  goToStep: (step) => set({ currentStep: step }),
-
-  // Preserves the active session (sessionToken, expiresAt, orderId) but clears return data
-  resetReturn: () =>
-    set((state) => ({
+export const useWizardStore = create<WizardState>()(
+  persist(
+    (set) => ({
+      sessionToken: null,
+      expiresAt: null,
+      orderId: null,
       returnId: null,
-      currentStep: 2,
+      currentStep: 1,
       selectedItems: [],
       deliveryMethod: null,
       storeId: null,
@@ -84,16 +52,72 @@ export const useWizardStore = create<WizardState>((set) => ({
       ticketNumber: null,
       totalRefund: 0,
       confirmationEmail: null,
-      sessionToken: state.sessionToken,
-      expiresAt: state.expiresAt,
-      orderId: state.orderId,
-    })),
 
-  reset: () =>
-    set({
-      sessionToken: null, expiresAt: null, orderId: null, returnId: null,
-      currentStep: 1, selectedItems: [], deliveryMethod: null, storeId: null,
-      carrierAddress: null, refundMethod: null, ticketNumber: null,
-      totalRefund: 0, confirmationEmail: null,
+      setSession: (token, expiresAt, orderId) =>
+        set({ sessionToken: token, expiresAt, orderId, currentStep: 2 }),
+
+      setReturnId: (id, items) => set({ returnId: id, selectedItems: items }),
+
+      setViewReturnId: (id) => set({ returnId: id }),
+
+      setSelectedItems: (items) => set({ selectedItems: items }),
+
+      setDeliveryStore: (storeId) => set({ deliveryMethod: 'TIENDA', storeId, carrierAddress: null }),
+
+      setDeliveryCarrier: (address) =>
+        set({ deliveryMethod: 'TRANSPORTADORA', carrierAddress: address, storeId: null }),
+
+      setRefundMethod: (method) => set({ refundMethod: method }),
+
+      setConfirmation: (ticketNumber, totalRefund, confirmationEmail) =>
+        set({ ticketNumber, totalRefund, confirmationEmail }),
+
+      goToStep: (step) => set({ currentStep: step }),
+
+      resetReturn: () =>
+        set((state) => ({
+          returnId: null,
+          currentStep: 2,
+          selectedItems: [],
+          deliveryMethod: null,
+          storeId: null,
+          carrierAddress: null,
+          refundMethod: null,
+          ticketNumber: null,
+          totalRefund: 0,
+          confirmationEmail: null,
+          sessionToken: state.sessionToken,
+          expiresAt: state.expiresAt,
+          orderId: state.orderId,
+        })),
+
+      reset: () =>
+        set({
+          sessionToken: null, expiresAt: null, orderId: null, returnId: null,
+          currentStep: 1, selectedItems: [], deliveryMethod: null, storeId: null,
+          carrierAddress: null, refundMethod: null, ticketNumber: null,
+          totalRefund: 0, confirmationEmail: null,
+        }),
     }),
-}));
+    {
+      name: 'koaj-wizard-session',
+      storage: createJSONStorage(() => sessionStorage),
+      // Solo persiste los campos de sesión/progreso, no las funciones
+      partialize: (state) => ({
+        sessionToken: state.sessionToken,
+        expiresAt: state.expiresAt,
+        orderId: state.orderId,
+        returnId: state.returnId,
+        currentStep: state.currentStep,
+        selectedItems: state.selectedItems,
+        deliveryMethod: state.deliveryMethod,
+        storeId: state.storeId,
+        carrierAddress: state.carrierAddress,
+        refundMethod: state.refundMethod,
+        ticketNumber: state.ticketNumber,
+        totalRefund: state.totalRefund,
+        confirmationEmail: state.confirmationEmail,
+      }),
+    },
+  ),
+);
