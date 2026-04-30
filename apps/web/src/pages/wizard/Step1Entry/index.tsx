@@ -233,9 +233,9 @@ export default function Step1Entry() {
             <span className="e-footer-logo">KOAJ</span>
             <span className="e-footer-copy">© 2024 KOAJ. Todos los derechos reservados.</span>
             <div className="e-footer-links">
-              <a href="#" className="e-footer-link">Términos y condiciones</a>
+              <a href="https://www.koaj.co/info/terminos-y-condiciones-de-uso" target="_blank" rel="noopener noreferrer" className="e-footer-link">Términos y condiciones</a>
               <span className="e-footer-sep">|</span>
-              <a href="#" className="e-footer-link">Política de privacidad</a>
+              <a href="https://www.koaj.co/info/politicas-de-proteccion-de-datos" target="_blank" rel="noopener noreferrer" className="e-footer-link">Política de privacidad</a>
             </div>
           </footer>
         </div>
