@@ -214,18 +214,19 @@ export default function Step1Entry() {
             </div>
 
             {/* Help banner */}
-            <div className="e-help">
+            <a
+              href="https://wa.me/573504965388"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="e-help e-help--link"
+            >
               <IconHeadset className="e-help-icon" />
               <div>
                 <p className="e-help-title">¿Necesitas ayuda?</p>
-                <p className="e-help-sub">
-                  Escríbenos a{' '}
-                  <a href="mailto:servicioalcliente@koaj.co" className="e-help-link">
-                    servicioalcliente@koaj.co
-                  </a>
-                </p>
+                <p className="e-help-sub">Escríbenos por WhatsApp</p>
               </div>
-            </div>
+              <span className="e-help-arrow">→</span>
+            </a>
           </div>
 
           {/* Footer */}
