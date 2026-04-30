@@ -30,20 +30,11 @@
 }
 
 .p2-header-inner {
-  max-width: 56rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 0.625rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.p2-logo {
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: .08em;
-  color: #111827;
-  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -825,12 +816,7 @@
 .p2-action-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ══════════════════════════════════════════════════════
-   OVERRIDES STEP INDICATOR dentro del header
+   STEP INDICATOR dentro del header — StepIndicator
+   ocupa todo el ancho disponible
    ══════════════════════════════════════════════════════ */
-.p2-header .step-indicator    { flex: 1; margin-bottom: 0; }
-.p2-header .step-dots         { flex: 1; }
-.p2-header .step-logout       { margin-bottom: 0; }
-.p2-header .step-dot--active  { background-color: var(--koaj) !important; }
-.p2-header .step-dot--done    { background-color: #16a34a !important; }
-.p2-header .step-label--active{ color: var(--koaj) !important; }
-.p2-header .step-connector--done { background-color: #16a34a !important; }
+.p2-header .si-root { flex: 1; }

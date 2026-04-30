@@ -346,7 +346,6 @@ export default function Step2Products() {
       {/* Header sticky */}
       <header className="p2-header">
         <div className="p2-header-inner">
-          <span className="p2-logo">KOAJ</span>
           <StepIndicator current={2} />
         </div>
       </header>
