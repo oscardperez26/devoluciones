@@ -512,6 +512,30 @@
   box-shadow: 0 0 0 2px var(--koaj-ring);
 }
 
+/* Contenedor del ícono de causal */
+.rm-icon-wrap {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s, color .12s;
+  color: #6b7280;
+}
+
+.rm-icon-wrap--on {
+  background: rgba(79, 70, 229, 0.15);
+  color: var(--koaj);
+}
+
+.rm-reason-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
 /* Radio button visual */
 .rm-radio {
   flex-shrink: 0;

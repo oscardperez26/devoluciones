@@ -26,6 +26,75 @@ interface ReasonModalItem {
   currentCode: string;
 }
 
+/* ══════════════════════════════════════════════════════
+   Iconos por causal — mapeo por palabras clave
+   ══════════════════════════════════════════════════════ */
+function ReasonIcon({ reason }: { reason: EligibleReason }) {
+  const t = (reason.label + ' ' + (reason.grupo ?? '')).toLowerCase();
+  const cls = 'rm-reason-icon';
+
+  // ── Talla & fit ──────────────────────────────────────
+  if (t.match(/grande|ancho|ampli/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v2M16 20h2a2 2 0 0 0 2-2v-2M9 12h6M12 9l3 3-3 3"/></svg>;
+
+  if (t.match(/pequeñ|estrech|ajust|corto/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3M9 12h6M15 9l-3 3 3 3"/></svg>;
+
+  if (t.match(/talla|medida|tallaje|size/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20M5 12V8m4 4V6m4 4V4m4 4v4"/></svg>;
+
+  // ── Color / apariencia ───────────────────────────────
+  if (t.match(/color|tono|decolor|mancha/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="13.5" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="M2 20l8-8M12 2l8 8"/></svg>;
+
+  // ── Expectativa / foto / descripción ─────────────────
+  if (t.match(/foto|imagen|espera|descri|parec|muest/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>;
+
+  // ── Modelo / diseño / producto diferente ─────────────
+  if (t.match(/model|diseño|referencia|estilo|product/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H5v10a2 2 0 002 2h10a2 2 0 002-2V10h1.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg>;
+
+  // ── Material / tela ──────────────────────────────────
+  if (t.match(/material|tela|tejido|fibra|acabado/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3zM13 13l6 6"/></svg>;
+
+  // ── Defecto de fabricación ───────────────────────────
+  if (t.match(/defecto|falla|fabri|manufactu/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.77 3.77z"/></svg>;
+
+  // ── Costura / hilo / botón / cremallera ──────────────
+  if (t.match(/costura|hilo|borda|cremall|botón|boton|zipper|puntada/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 8v1M12 15v1M8 12h1M15 12h1M9.17 9.17l.7.7M14.13 14.13l.7.7M9.17 14.83l.7-.7M14.13 9.87l.7-.7"/></svg>;
+
+  // ── Producto equivocado / incorrecto ─────────────────
+  if (t.match(/equivoc|incorrect|error|cambio|equipa/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3l4 4-4 4M8 7h12M8 21l-4-4 4-4M4 17h12"/></svg>;
+
+  // ── Daño en tránsito / llegó roto ────────────────────
+  if (t.match(/dañ|roto|rota|golpe|maltrat|transit|transpor/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><line x1="12" y1="22" x2="12" y2="11.5"/><line x1="12" y1="7" x2="12" y2="7.01"/></svg>;
+
+  // ── Demora / tardanza ────────────────────────────────
+  if (t.match(/tard|demor|tiempo|plazo|retraso/))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+
+  // ── Fallback por grupo ───────────────────────────────
+  const g = (reason.grupo ?? '').toLowerCase();
+
+  if (g.includes('talla'))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 6H3M21 12H3M21 18H3"/><circle cx="9" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1" fill="currentColor" stroke="none"/></svg>;
+
+  if (g.includes('entrega') || g.includes('despacho'))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>;
+
+  if (g.includes('calidad'))
+    return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>;
+
+  // Genérico
+  return <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
+}
+
 function groupReasons(reasons: EligibleReason[]) {
   const map = new Map<string, EligibleReason[]>();
   for (const r of reasons) {
@@ -116,9 +185,9 @@ function ReasonModal({
                         className={`rm-option ${isSel ? 'rm-option--on' : ''}`}
                         onClick={() => setSelected(isSel ? '' : r.code)}
                       >
-                        {/* Radio indicator */}
-                        <span className={`rm-radio ${isSel ? 'rm-radio--on' : ''}`}>
-                          {isSel && <span className="rm-radio-dot" />}
+                        {/* Icono alusivo a la causal */}
+                        <span className={`rm-icon-wrap ${isSel ? 'rm-icon-wrap--on' : ''}`}>
+                          <ReasonIcon reason={r} />
                         </span>
 
                         {/* Label */}
