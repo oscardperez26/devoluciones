@@ -466,23 +466,28 @@ export default function Step2Products() {
                 const done = evidenceDone.has(s.devolucionItemId!);
                 return (
                   <div key={s.devolucionItemId} className={`p2-ev-card ${done ? 'p2-ev-card--done' : ''}`}>
-                    <div className="p2-ev-img-wrap">
-                      {item?.imageUrl
-                        ? <img src={item.imageUrl} alt={item.productName} className="p2-ev-img" />
-                        : <div className="p2-ev-img-ph">👕</div>
-                      }
-                      {done && (
-                        <div className="p2-ev-done-overlay">
-                          <svg viewBox="0 0 24 24" fill="none" className="p2-ev-done-icon">
-                            <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p2-ev-info">
+                    {/* Fila cabecera: miniatura + nombre */}
+                    <div className="p2-ev-header">
+                      <div className="p2-ev-img-wrap">
+                        {item?.imageUrl
+                          ? <img src={item.imageUrl} alt={item.productName} className="p2-ev-img" />
+                          : <div className="p2-ev-img-ph">👕</div>
+                        }
+                        {done && (
+                          <div className="p2-ev-done-overlay">
+                            <svg viewBox="0 0 24 24" fill="none" className="p2-ev-done-icon">
+                              <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
                       <p className="p2-ev-name">{item?.productName ?? s.orderItemId}</p>
+                    </div>
+
+                    {/* Zona de upload — ancho completo */}
+                    <div className="p2-ev-body">
                       {done
-                        ? <p className="p2-ev-done-text">Foto subida</p>
+                        ? <p className="p2-ev-done-text">✓ Foto subida correctamente</p>
                         : <EvidenceUpload returnId={returnId!} devolucionItemId={s.devolucionItemId!} onUploaded={() => handleEvidenceDone(s.devolucionItemId!)} />
                       }
                     </div>
