@@ -11,17 +11,17 @@ import type { SelectedItem } from '@/store/wizard.store';
 import { useWizardStore } from '@/store/wizard.store';
 import type { EligibleReason, OrderItem } from '@/types';
 
-const BLOCKED_LABELS: Record<string, { text: string; icon: string }> = {
-  ACTIVE_RETURN:    { icon: '🔄', text: 'Ya tiene una devolución en proceso.' },
-  ALREADY_REFUNDED: { icon: '✅', text: 'Ya fue reembolsado.' },
-  NOT_RETURNABLE:   { icon: '🚫', text: 'No elegible para devolución.' },
+const BLOCKED_LABELS: Record<string, { text: string }> = {
+  ACTIVE_RETURN:    { text: 'Devolución en proceso' },
+  ALREADY_REFUNDED: { text: 'Ya reembolsado' },
+  NOT_RETURNABLE:   { text: 'No retornable' },
 };
 
 const GROUP_ORDER = ['Talla y expectativa', 'Entrega y despacho', 'Calidad del producto'];
 
 type Phase = 'selecting' | 'evidence';
 
-function groupReasons(reasons: EligibleReason[]): { grupo: string; items: EligibleReason[] }[] {
+function groupReasons(reasons: EligibleReason[]) {
   const map = new Map<string, EligibleReason[]>();
   for (const r of reasons) {
     const g = r.grupo ?? 'Otros';
@@ -48,7 +48,7 @@ function ReasonChips({
   onSelect: (code: string) => void;
 }) {
   if (reasons.length === 0) {
-    return <p className="p2-no-reasons">Plazo de devolución vencido.</p>;
+    return <p className="p2-no-reasons">Plazo vencido.</p>;
   }
   const groups = groupReasons(reasons);
   return (
@@ -58,19 +58,16 @@ function ReasonChips({
           <span className="p2-reason-group-label">{grupo}</span>
           <div className="p2-chips">
             {items.map((r) => {
-              const isSelected = r.code === selected;
+              const isSel = r.code === selected;
               return (
                 <button
                   key={r.code}
                   type="button"
                   onClick={() => onSelect(r.code)}
-                  className={`p2-chip ${isSelected ? 'p2-chip--on' : ''}`}
+                  className={`p2-chip ${isSel ? 'p2-chip--on' : ''}`}
                 >
                   {r.label}
                   {r.requiresEvidence && <span className="p2-chip-cam">📷</span>}
-                  {r.daysLeft <= 5 && !isSelected && (
-                    <span className="p2-chip-days">{r.daysLeft}d</span>
-                  )}
                 </button>
               );
             })}
@@ -78,6 +75,15 @@ function ReasonChips({
         </div>
       ))}
     </div>
+  );
+}
+
+/* Ícono check SVG */
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 12 12" fill="none" className="p2-chk-svg">
+      <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -120,7 +126,7 @@ export default function Step2Products() {
 
   async function saveDraft() {
     if (selected.length === 0) { setError('Selecciona al menos un producto.'); return; }
-    if (selected.some((s) => s.reasonCodes.length === 0)) { setError('Selecciona el motivo de cada producto seleccionado.'); return; }
+    if (selected.some((s) => s.reasonCodes.length === 0)) { setError('Selecciona el motivo de cada producto.'); return; }
     setError('');
     setSaving(true);
     try {
@@ -180,90 +186,99 @@ export default function Step2Products() {
         </div>
       </header>
 
-      {/* ── Scrollable body ── */}
+      {/* ── Cuerpo scrollable ── */}
       <main className="p2-body">
         {phase === 'selecting' ? (
           <>
             <div className="p2-title-block">
               <h2 className="p2-title">¿Qué deseas devolver?</h2>
               <p className="p2-subtitle">
-                Selecciona el producto y el motivo. {data?.items.length ? `${data.items.length} producto${data.items.length > 1 ? 's' : ''} en tu pedido.` : ''}
+                Toca el producto, selecciónalo y elige el motivo.
+                {data?.items.length ? ` · ${data.items.length} prenda${data.items.length > 1 ? 's' : ''} en tu pedido` : ''}
               </p>
             </div>
 
-            <div className="p2-list">
+            {/* ── Grid de productos ── */}
+            <div className="p2-grid">
               {data?.items.map((item) => {
                 const isSelected = selected.some((s) => s.orderItemId === item.id);
                 const sel = selected.find((s) => s.orderItemId === item.id);
                 const blocked = !item.isReturnable || !!item.blockedReason;
                 const bl = blocked ? BLOCKED_LABELS[item.blockedReason ?? ''] : null;
+                const reasonDone = (sel?.reasonCodes.length ?? 0) > 0;
 
                 return (
                   <div
                     key={item.id}
                     className={`p2-card ${blocked ? 'p2-card--blocked' : isSelected ? 'p2-card--on' : ''}`}
                   >
-                    {/* Row principal */}
+                    {/* ── Imagen protagonista ── */}
                     <div
-                      className={`p2-card-row ${!blocked ? 'p2-card-row--click' : ''}`}
+                      className={`p2-img-wrap ${!blocked ? 'p2-img-wrap--click' : ''}`}
                       onClick={() => { if (!blocked) toggleItem(item); }}
                     >
-                      {/* Thumbnail */}
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.productName}
-                          className="p2-thumb"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          className={`p2-img ${blocked ? 'p2-img--dim' : ''}`}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('p2-img-ph--hidden');
+                          }}
                         />
-                      ) : (
-                        <div className="p2-thumb-ph">👕</div>
+                      ) : null}
+                      <div className={`p2-img-ph ${item.imageUrl ? 'p2-img-ph--hidden' : ''}`}>👕</div>
+
+                      {/* Badge de estado bloqueado */}
+                      {blocked && bl && (
+                        <div className="p2-blocked-badge">{bl.text}</div>
                       )}
 
-                      {/* Info */}
-                      <div className="p2-info">
-                        <p className={`p2-name ${blocked ? 'p2-name--dim' : ''}`}>{item.productName}</p>
-                        <p className="p2-meta">
-                          {[item.sku, item.size && `Talla ${item.size}`, item.color].filter(Boolean).join(' · ')}
-                        </p>
-                        <p className="p2-price">${item.unitPrice.toLocaleString('es-CO')}</p>
-
-                        {blocked && bl && (
-                          <div className="p2-blocked">
-                            <span>{bl.icon}</span>
-                            <span>{bl.text}</span>
-                            {item.blockingReturnId && (
-                              <button
-                                className="p2-blocked-link"
-                                onClick={(e) => { e.stopPropagation(); handleViewBlockedReturn(item); }}
-                              >
-                                Ver estado →
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Checkbox */}
+                      {/* Checkbox flotante */}
                       {!blocked && (
-                        <div className={`p2-check ${isSelected ? 'p2-check--on' : ''}`}>
-                          {isSelected && (
-                            <svg viewBox="0 0 12 12" fill="none" className="p2-check-svg">
-                              <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          )}
+                        <div className={`p2-chk ${isSelected ? 'p2-chk--on' : ''}`}>
+                          {isSelected && <CheckIcon />}
                         </div>
+                      )}
+
+                      {/* Badge "motivo ✓" sobre imagen cuando está ok */}
+                      {isSelected && reasonDone && (
+                        <div className="p2-reason-badge">✓ Listo</div>
                       )}
                     </div>
 
-                    {/* Motivos inline cuando está seleccionado */}
+                    {/* ── Info del producto ── */}
+                    <div
+                      className={`p2-info ${!blocked ? 'p2-info--click' : ''}`}
+                      onClick={() => { if (!blocked) toggleItem(item); }}
+                    >
+                      <p className={`p2-name ${blocked ? 'p2-name--dim' : ''}`}>{item.productName}</p>
+                      <div className="p2-meta-row">
+                        {item.size && <span className="p2-tag">T. {item.size}</span>}
+                        {item.color && <span className="p2-tag p2-tag--color">C. {item.color}</span>}
+                      </div>
+                      <p className={`p2-price ${blocked ? 'p2-price--dim' : ''}`}>
+                        ${item.unitPrice.toLocaleString('es-CO')}
+                      </p>
+                      {blocked && item.blockingReturnId && (
+                        <button
+                          className="p2-blocked-link"
+                          onClick={(e) => { e.stopPropagation(); handleViewBlockedReturn(item); }}
+                        >
+                          Ver estado →
+                        </button>
+                      )}
+                    </div>
+
+                    {/* ── Motivos (expandible cuando está seleccionado) ── */}
                     {isSelected && sel && (
                       <div className="p2-reasons">
-                        <span className="p2-reasons-label">
-                          {sel.reasonCodes.length > 0
-                            ? <><span className="p2-reasons-ok">✓</span> Motivo seleccionado</>
-                            : 'Selecciona el motivo:'}
-                        </span>
+                        <p className="p2-reasons-label">
+                          {reasonDone
+                            ? <><span className="p2-reasons-ok">✓</span> Motivo elegido</>
+                            : '¿Por qué lo devuelves?'}
+                        </p>
                         <ReasonChips
                           reasons={item.eligibleReasons}
                           selected={sel.reasonCodes[0] ?? ''}
@@ -277,49 +292,48 @@ export default function Step2Products() {
             </div>
           </>
         ) : (
+          /* ── Fase evidencia ── */
           <>
             <div className="p2-title-block">
-              <h2 className="p2-title">Sube las fotos del defecto</h2>
-              <p className="p2-subtitle">Requerido para continuar con tu devolución.</p>
+              <h2 className="p2-title">Fotos del defecto</h2>
+              <p className="p2-subtitle">Sube una foto por cada prenda que requiere evidencia.</p>
             </div>
 
-            <div className="p2-list">
+            <div className="p2-ev-grid">
               {itemsNeedingEvidence.map((s) => {
                 const item = data?.items.find((i) => i.id === s.orderItemId);
+                const done = evidenceDone.has(s.devolucionItemId!);
                 return (
-                  <div key={s.devolucionItemId} className="p2-card p2-card--evidence">
-                    <div className="p2-ev-header">
-                      {item?.imageUrl ? (
-                        <img src={item.imageUrl} alt={item?.productName} className="p2-thumb" />
-                      ) : (
-                        <div className="p2-thumb-ph">👕</div>
+                  <div key={s.devolucionItemId} className={`p2-ev-card ${done ? 'p2-ev-card--done' : ''}`}>
+                    <div className="p2-ev-img-wrap">
+                      {item?.imageUrl
+                        ? <img src={item.imageUrl} alt={item.productName} className="p2-ev-img" />
+                        : <div className="p2-ev-img-ph">👕</div>
+                      }
+                      {done && (
+                        <div className="p2-ev-done-overlay">
+                          <svg viewBox="0 0 24 24" fill="none" className="p2-ev-done-icon">
+                            <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
                       )}
-                      <div className="p2-info">
-                        <p className="p2-name">{item?.productName ?? s.orderItemId}</p>
-                        <p className="p2-meta">Motivo: {s.reasonCodes.join(', ')}</p>
-                      </div>
                     </div>
-
-                    {evidenceDone.has(s.devolucionItemId!) ? (
-                      <div className="p2-ev-done">
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="p2-ev-done-icon">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                        </svg>
-                        Foto subida correctamente
-                      </div>
-                    ) : (
-                      <EvidenceUpload
-                        returnId={returnId!}
-                        devolucionItemId={s.devolucionItemId!}
-                        onUploaded={() => handleEvidenceDone(s.devolucionItemId!)}
-                      />
-                    )}
+                    <div className="p2-ev-info">
+                      <p className="p2-ev-name">{item?.productName ?? s.orderItemId}</p>
+                      {done ? (
+                        <p className="p2-ev-done-text">Foto subida</p>
+                      ) : (
+                        <EvidenceUpload
+                          returnId={returnId!}
+                          devolucionItemId={s.devolucionItemId!}
+                          onUploaded={() => handleEvidenceDone(s.devolucionItemId!)}
+                        />
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
-
-            <p className="p2-ev-hint">Confirma la foto de cada producto para avanzar automáticamente.</p>
           </>
         )}
       </main>
@@ -327,20 +341,16 @@ export default function Step2Products() {
       {/* ── Barra de acción sticky ── */}
       {phase === 'selecting' && (
         <div className="p2-action-bar">
-          {error && (
-            <div className="p2-action-error">
-              <ErrorMessage message={error} />
-            </div>
-          )}
+          {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
           <div className="p2-action-inner">
             <div className="p2-action-summary">
               {selCount === 0
-                ? <span className="p2-action-hint">Ningún producto seleccionado</span>
-                : <span className="p2-action-count">{selCount} producto{selCount > 1 ? 's' : ''} seleccionado{selCount > 1 ? 's' : ''}</span>
+                ? <span className="p2-action-hint">Selecciona una prenda</span>
+                : <>
+                    <span className="p2-action-count">{selCount} prenda{selCount > 1 ? 's' : ''}</span>
+                    {!allHaveReason && <span className="p2-action-warn"> · falta motivo</span>}
+                  </>
               }
-              {selCount > 0 && !allHaveReason && (
-                <span className="p2-action-warn">— falta motivo</span>
-              )}
             </div>
             <button
               type="button"
