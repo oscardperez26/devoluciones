@@ -175,6 +175,9 @@
 
 /* ── Botón Cerrar sesión ── */
 .si-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.75rem;
   color: #9ca3af;
   background: none;
@@ -189,7 +192,26 @@
 
 .si-logout:hover { color: #ef4444; }
 
+/* En móvil pequeño, solo muestra el ícono de salida */
+.si-logout-label { display: none; }
+
+@media (min-width: 480px) {
+  .si-logout-label { display: inline; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE MÓVIL
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 479px) {
+  .si-root { gap: 0.5rem; }
+
+  .si-logo { width: 1.75rem; height: 1.75rem; }
+
+  .si-sep { display: none; }
+
+  .si-mobile-name { font-size: 0.8125rem; }
+}
+
 /* ── Overrides desde páginas que embeben StepIndicator ── */
-/* (el margin-bottom: 2rem del antiguo .step-indicator ya no aplica) */
 .step-indicator    { margin-bottom: 0; }
 .step-logout       { margin-bottom: 0; }

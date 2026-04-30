@@ -86,8 +86,11 @@ export default function StepIndicator({ current }: { current: number }) {
       </div>
 
       {/* ── Cerrar sesión ── */}
-      <button type="button" onClick={handleLogout} className="si-logout">
-        Cerrar sesión
+      <button type="button" onClick={handleLogout} className="si-logout" title="Cerrar sesión">
+        <svg viewBox="0 0 20 20" fill="none" width="16" height="16" style={{ flexShrink: 0 }}>
+          <path d="M13 3h4a1 1 0 011 1v12a1 1 0 01-1 1h-4M9 14l4-4-4-4M3 10h10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="si-logout-label">Cerrar sesión</span>
       </button>
 
     </div>

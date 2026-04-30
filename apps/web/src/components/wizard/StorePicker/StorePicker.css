@@ -412,3 +412,22 @@
 
 .sp-confirm-btn:hover  { background: #4338ca; }
 .sp-confirm-btn:active { transform: scale(.98); }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE MÓVIL
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 479px) {
+  .sp-body { padding: 0.75rem; }
+
+  .sp-header { padding: 0.875rem 1rem 0.75rem; }
+
+  .sp-footer { padding: 0.75rem 1rem; }
+
+  .sp-field-header { padding: 0.75rem 0.875rem; }
+
+  .sp-option { padding: 0.625rem 0.875rem; }
+
+  .sp-store { padding: 0.875rem; gap: 0.625rem; }
+
+  .sp-confirm-btn { padding: 0.625rem 1.125rem; font-size: 0.875rem; }
+}
