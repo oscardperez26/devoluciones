@@ -283,7 +283,13 @@
   box-shadow: 0 0 0 3px rgba(79,70,229,.12);
 }
 
-.sp-store-icon { font-size: 1.625rem; line-height: 1; flex-shrink: 0; }
+.sp-store-logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  display: block;
+}
 
 .sp-store-info {
   flex: 1;

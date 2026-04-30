@@ -212,7 +212,7 @@ export default function StorePicker({ onSelect, onClose, selectedStoreId }: Prop
                     <button key={store.id} type="button"
                       className={`sp-store ${isOn ? 'sp-store--on' : ''}`}
                       onClick={() => setPending(store)}>
-                      <div className="sp-store-icon">🏪</div>
+                      <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="KOAJ" className="sp-store-logo" />
                       <div className="sp-store-info">
                         <p className="sp-store-name">{store.nombre}</p>
                         <p className="sp-store-addr">
