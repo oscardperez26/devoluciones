@@ -1,5 +1,5 @@
 import './Step2Products.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getSessionOrder } from '@/api/orders.api';
@@ -21,6 +21,11 @@ const GROUP_ORDER = ['Talla y expectativa', 'Entrega y despacho', 'Calidad del p
 
 type Phase = 'selecting' | 'evidence';
 
+interface ReasonModalItem {
+  item: OrderItem;
+  currentCode: string;
+}
+
 function groupReasons(reasons: EligibleReason[]) {
   const map = new Map<string, EligibleReason[]>();
   for (const r of reasons) {
@@ -38,47 +43,129 @@ function groupReasons(reasons: EligibleReason[]) {
   return ordered;
 }
 
-function ReasonChips({
-  reasons,
-  selected,
-  onSelect,
+/* ── Modal / bottom-sheet de motivos ── */
+function ReasonModal({
+  data,
+  onConfirm,
+  onClose,
 }: {
-  reasons: EligibleReason[];
-  selected: string;
-  onSelect: (code: string) => void;
+  data: ReasonModalItem;
+  onConfirm: (code: string) => void;
+  onClose: () => void;
 }) {
-  if (reasons.length === 0) {
-    return <p className="p2-no-reasons">Plazo vencido.</p>;
-  }
-  const groups = groupReasons(reasons);
+  const { item, currentCode } = data;
+  const [selected, setSelected] = useState(currentCode);
+  const groups = groupReasons(item.eligibleReasons);
+
+  // Cierra con Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  // Bloquea scroll del body mientras está abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const canConfirm = selected !== '';
+
   return (
-    <div className="p2-reason-groups">
-      {groups.map(({ grupo, items }) => (
-        <div key={grupo} className="p2-reason-group">
-          <span className="p2-reason-group-label">{grupo}</span>
-          <div className="p2-chips">
-            {items.map((r) => {
-              const isSel = r.code === selected;
-              return (
-                <button
-                  key={r.code}
-                  type="button"
-                  onClick={() => onSelect(r.code)}
-                  className={`p2-chip ${isSel ? 'p2-chip--on' : ''}`}
-                >
-                  {r.label}
-                  {r.requiresEvidence && <span className="p2-chip-cam">📷</span>}
-                </button>
-              );
-            })}
+    <div className="rm-backdrop" onClick={onClose}>
+      <div className="rm-sheet" onClick={(e) => e.stopPropagation()}>
+
+        {/* Handle visual (mobile) */}
+        <div className="rm-handle" />
+
+        {/* Header */}
+        <div className="rm-header">
+          <div className="rm-header-product">
+            {item.imageUrl && (
+              <img src={item.imageUrl} alt={item.productName} className="rm-thumb" />
+            )}
+            <div className="rm-header-info">
+              <p className="rm-header-label">Motivo de devolución</p>
+              <p className="rm-header-name">{item.productName}</p>
+              {item.size && <p className="rm-header-meta">Talla {item.size}{item.color ? ` · Color ${item.color}` : ''}</p>}
+            </div>
           </div>
+          <button className="rm-close" onClick={onClose} aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      ))}
+
+        {/* Causales */}
+        <div className="rm-body">
+          {item.eligibleReasons.length === 0 ? (
+            <p className="rm-empty">El plazo de devolución para este producto ha vencido.</p>
+          ) : (
+            groups.map(({ grupo, items }) => (
+              <div key={grupo} className="rm-group">
+                <p className="rm-group-label">{grupo}</p>
+                <div className="rm-options">
+                  {items.map((r) => {
+                    const isSel = r.code === selected;
+                    return (
+                      <button
+                        key={r.code}
+                        type="button"
+                        className={`rm-option ${isSel ? 'rm-option--on' : ''}`}
+                        onClick={() => setSelected(isSel ? '' : r.code)}
+                      >
+                        {/* Radio indicator */}
+                        <span className={`rm-radio ${isSel ? 'rm-radio--on' : ''}`}>
+                          {isSel && <span className="rm-radio-dot" />}
+                        </span>
+
+                        {/* Label */}
+                        <span className="rm-option-label">{r.label}</span>
+
+                        {/* Badges */}
+                        <span className="rm-option-badges">
+                          {r.requiresEvidence && (
+                            <span className="rm-badge rm-badge--cam" title="Requiere foto">📷</span>
+                          )}
+                          {r.daysLeft <= 5 && (
+                            <span className="rm-badge rm-badge--days">{r.daysLeft}d</span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer con botón confirmar */}
+        <div className="rm-footer">
+          <button
+            type="button"
+            className="rm-btn-cancel"
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={!canConfirm}
+            className="rm-btn-confirm"
+            onClick={() => { onConfirm(selected); onClose(); }}
+          >
+            Confirmar motivo
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
-/* Ícono check SVG */
+/* Ícono check */
 function CheckIcon() {
   return (
     <svg viewBox="0 0 12 12" fill="none" className="p2-chk-svg">
@@ -95,6 +182,7 @@ export default function Step2Products() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [evidenceDone, setEvidenceDone] = useState<Set<string>>(new Set());
+  const [reasonModal, setReasonModal] = useState<ReasonModalItem | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['session-order'],
@@ -102,19 +190,27 @@ export default function Step2Products() {
   });
 
   function toggleItem(item: OrderItem) {
-    setSelected((prev) => {
-      const exists = prev.find((s) => s.orderItemId === item.id);
-      if (exists) return prev.filter((s) => s.orderItemId !== item.id);
-      return [...prev, { orderItemId: item.id, reasonCodes: [], comments: '', quantity: 1, productName: item.productName }];
-    });
+    const exists = selected.find((s) => s.orderItemId === item.id);
+    if (exists) {
+      // Deseleccionar — quitar de la lista
+      setSelected((prev) => prev.filter((s) => s.orderItemId !== item.id));
+    } else {
+      // Seleccionar — agregar y abrir modal de motivo inmediatamente
+      setSelected((prev) => [
+        ...prev,
+        { orderItemId: item.id, reasonCodes: [], comments: '', quantity: 1, productName: item.productName },
+      ]);
+      setReasonModal({ item, currentCode: '' });
+    }
   }
 
-  function selectReason(itemId: string, code: string) {
+  function openReasonModal(item: OrderItem, currentCode: string) {
+    setReasonModal({ item, currentCode });
+  }
+
+  function confirmReason(itemId: string, code: string) {
     setSelected((prev) =>
-      prev.map((s) => {
-        if (s.orderItemId !== itemId) return s;
-        return { ...s, reasonCodes: s.reasonCodes[0] === code ? [] : [code] };
-      }),
+      prev.map((s) => s.orderItemId === itemId ? { ...s, reasonCodes: code ? [code] : [] } : s),
     );
   }
 
@@ -178,7 +274,7 @@ export default function Step2Products() {
 
   return (
     <div className="p2-root">
-      {/* ── Header sticky ── */}
+      {/* Header sticky */}
       <header className="p2-header">
         <div className="p2-header-inner">
           <span className="p2-logo">KOAJ</span>
@@ -186,19 +282,18 @@ export default function Step2Products() {
         </div>
       </header>
 
-      {/* ── Cuerpo scrollable ── */}
+      {/* Cuerpo */}
       <main className="p2-body">
         {phase === 'selecting' ? (
           <>
             <div className="p2-title-block">
               <h2 className="p2-title">¿Qué deseas devolver?</h2>
               <p className="p2-subtitle">
-                Toca el producto, selecciónalo y elige el motivo.
-                {data?.items.length ? ` · ${data.items.length} prenda${data.items.length > 1 ? 's' : ''} en tu pedido` : ''}
+                Toca la prenda para seleccionarla y elegir el motivo.
+                {data?.items.length ? ` · ${data.items.length} prenda${data.items.length > 1 ? 's' : ''}` : ''}
               </p>
             </div>
 
-            {/* ── Grid de productos ── */}
             <div className="p2-grid">
               {data?.items.map((item) => {
                 const isSelected = selected.some((s) => s.orderItemId === item.id);
@@ -212,7 +307,7 @@ export default function Step2Products() {
                     key={item.id}
                     className={`p2-card ${blocked ? 'p2-card--blocked' : isSelected ? 'p2-card--on' : ''}`}
                   >
-                    {/* ── Imagen protagonista ── */}
+                    {/* Imagen protagonista */}
                     <div
                       className={`p2-img-wrap ${!blocked ? 'p2-img-wrap--click' : ''}`}
                       onClick={() => { if (!blocked) toggleItem(item); }}
@@ -224,31 +319,32 @@ export default function Step2Products() {
                           className={`p2-img ${blocked ? 'p2-img--dim' : ''}`}
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('p2-img-ph--hidden');
                           }}
                         />
-                      ) : null}
-                      <div className={`p2-img-ph ${item.imageUrl ? 'p2-img-ph--hidden' : ''}`}>👕</div>
+                      ) : (
+                        <div className="p2-img-ph">👕</div>
+                      )}
 
-                      {/* Badge de estado bloqueado */}
                       {blocked && bl && (
                         <div className="p2-blocked-badge">{bl.text}</div>
                       )}
 
-                      {/* Checkbox flotante */}
                       {!blocked && (
                         <div className={`p2-chk ${isSelected ? 'p2-chk--on' : ''}`}>
                           {isSelected && <CheckIcon />}
                         </div>
                       )}
 
-                      {/* Badge "motivo ✓" sobre imagen cuando está ok */}
                       {isSelected && reasonDone && (
                         <div className="p2-reason-badge">✓ Listo</div>
                       )}
+
+                      {isSelected && !reasonDone && (
+                        <div className="p2-reason-badge p2-reason-badge--pending">+ Motivo</div>
+                      )}
                     </div>
 
-                    {/* ── Info del producto ── */}
+                    {/* Info */}
                     <div
                       className={`p2-info ${!blocked ? 'p2-info--click' : ''}`}
                       onClick={() => { if (!blocked) toggleItem(item); }}
@@ -271,20 +367,18 @@ export default function Step2Products() {
                       )}
                     </div>
 
-                    {/* ── Motivos (expandible cuando está seleccionado) ── */}
-                    {isSelected && sel && (
-                      <div className="p2-reasons">
-                        <p className="p2-reasons-label">
-                          {reasonDone
-                            ? <><span className="p2-reasons-ok">✓</span> Motivo elegido</>
-                            : '¿Por qué lo devuelves?'}
-                        </p>
-                        <ReasonChips
-                          reasons={item.eligibleReasons}
-                          selected={sel.reasonCodes[0] ?? ''}
-                          onSelect={(code) => selectReason(item.id, code)}
-                        />
-                      </div>
+                    {/* Botón de motivo (solo cuando está seleccionado) */}
+                    {isSelected && (
+                      <button
+                        type="button"
+                        className={`p2-reason-btn ${reasonDone ? 'p2-reason-btn--done' : 'p2-reason-btn--pending'}`}
+                        onClick={() => openReasonModal(item, sel?.reasonCodes[0] ?? '')}
+                      >
+                        {reasonDone
+                          ? <>✓ {item.eligibleReasons.find(r => r.code === sel?.reasonCodes[0])?.label ?? 'Motivo elegido'}</>
+                          : '¿Por qué lo devuelves? →'
+                        }
+                      </button>
                     )}
                   </div>
                 );
@@ -292,13 +386,11 @@ export default function Step2Products() {
             </div>
           </>
         ) : (
-          /* ── Fase evidencia ── */
           <>
             <div className="p2-title-block">
               <h2 className="p2-title">Fotos del defecto</h2>
               <p className="p2-subtitle">Sube una foto por cada prenda que requiere evidencia.</p>
             </div>
-
             <div className="p2-ev-grid">
               {itemsNeedingEvidence.map((s) => {
                 const item = data?.items.find((i) => i.id === s.orderItemId);
@@ -320,15 +412,10 @@ export default function Step2Products() {
                     </div>
                     <div className="p2-ev-info">
                       <p className="p2-ev-name">{item?.productName ?? s.orderItemId}</p>
-                      {done ? (
-                        <p className="p2-ev-done-text">Foto subida</p>
-                      ) : (
-                        <EvidenceUpload
-                          returnId={returnId!}
-                          devolucionItemId={s.devolucionItemId!}
-                          onUploaded={() => handleEvidenceDone(s.devolucionItemId!)}
-                        />
-                      )}
+                      {done
+                        ? <p className="p2-ev-done-text">Foto subida</p>
+                        : <EvidenceUpload returnId={returnId!} devolucionItemId={s.devolucionItemId!} onUploaded={() => handleEvidenceDone(s.devolucionItemId!)} />
+                      }
                     </div>
                   </div>
                 );
@@ -338,7 +425,7 @@ export default function Step2Products() {
         )}
       </main>
 
-      {/* ── Barra de acción sticky ── */}
+      {/* Barra de acción sticky */}
       {phase === 'selecting' && (
         <div className="p2-action-bar">
           {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
@@ -362,6 +449,15 @@ export default function Step2Products() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Modal de motivos */}
+      {reasonModal && (
+        <ReasonModal
+          data={reasonModal}
+          onClose={() => setReasonModal(null)}
+          onConfirm={(code) => confirmReason(reasonModal.item.id, code)}
+        />
       )}
     </div>
   );
