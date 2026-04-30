@@ -10,27 +10,12 @@ const STEPS = [
   { label: 'Reembolso' },
 ];
 
-const BACK_ROUTES: Record<number, string> = {
-  2: '/',
-  3: '/paso-2',
-  4: '/paso-3',
-  5: '/paso-4',
-};
-
 const LOGO_SRC = `${import.meta.env.BASE_URL}favicon.svg`;
 
 function IconCheck() {
   return (
     <svg viewBox="0 0 12 12" fill="none" className="si-check-svg">
       <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconArrowLeft() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className="si-back-svg">
-      <path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -42,11 +27,6 @@ export default function StepIndicator({ current }: { current: number }) {
   function handleLogout() {
     reset();
     navigate('/');
-  }
-
-  function handleBack() {
-    const route = BACK_ROUTES[current];
-    if (route) navigate(route);
   }
 
   const progress = ((current - 1) / (STEPS.length - 1)) * 100;
@@ -61,16 +41,6 @@ export default function StepIndicator({ current }: { current: number }) {
 
       {/* ── Separador visual ── */}
       <div className="si-sep" />
-
-      {/* ── Botón Volver ── */}
-      {current > 1 ? (
-        <button type="button" className="si-back" onClick={handleBack}>
-          <IconArrowLeft />
-          <span className="si-back-label">Volver</span>
-        </button>
-      ) : (
-        <div className="si-back-ghost" />
-      )}
 
       {/* ── Track completo (desktop ≥ 640px) ── */}
       <div className="si-track">

@@ -498,11 +498,27 @@ export default function Step2Products() {
         )}
       </main>
 
-      {/* Barra de acción sticky */}
-      {phase === 'selecting' && (
-        <div className="p2-action-bar">
-          {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
-          <div className="p2-action-inner">
+      {/* Barra de acción sticky — siempre visible */}
+      <div className="p2-action-bar">
+        {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
+        <div className="p2-action-inner">
+          {/* Volver */}
+          <button
+            type="button"
+            className="p2-back-btn"
+            onClick={() => {
+              if (phase === 'evidence') setPhase('selecting');
+              else navigate('/');
+            }}
+          >
+            <svg viewBox="0 0 20 20" fill="none" className="p2-back-svg">
+              <path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Volver
+          </button>
+
+          {/* Info central */}
+          {phase === 'selecting' && (
             <div className="p2-action-summary">
               {selCount === 0
                 ? <span className="p2-action-hint">Selecciona una prenda</span>
@@ -512,6 +528,15 @@ export default function Step2Products() {
                   </>
               }
             </div>
+          )}
+          {phase === 'evidence' && (
+            <div className="p2-action-summary">
+              <span className="p2-action-hint">Sube la foto de cada prenda</span>
+            </div>
+          )}
+
+          {/* Continuar (solo en fase selecting) */}
+          {phase === 'selecting' && (
             <button
               type="button"
               disabled={saving || selCount === 0}
@@ -520,9 +545,12 @@ export default function Step2Products() {
             >
               {saving ? 'Guardando...' : 'Continuar →'}
             </button>
-          </div>
+          )}
+
+          {/* Spacer para mantener layout en fase evidence */}
+          {phase === 'evidence' && <div className="p2-action-spacer" />}
         </div>
-      )}
+      </div>
 
       {/* Modal de motivos */}
       {reasonModal && (

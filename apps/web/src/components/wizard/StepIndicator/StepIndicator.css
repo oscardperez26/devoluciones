@@ -32,44 +32,6 @@
   flex-shrink: 0;
 }
 
-/* ── Botón Volver ── */
-.si-back {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 0.3rem 0.625rem 0.3rem 0.375rem;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #374151;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.si-back:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  color: #111827;
-}
-
-.si-back-svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.si-back-label { line-height: 1; }
-
-/* Placeholder cuando no hay back (mantiene el espacio en flex) */
-.si-back-ghost {
-  width: 4.5rem;
-  flex-shrink: 0;
-}
-
 /* ══════════════════════════════════════════════════════
    TRACK COMPLETO — visible en ≥ 640 px
    ══════════════════════════════════════════════════════ */
