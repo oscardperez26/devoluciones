@@ -1,5 +1,5 @@
 import './Step2Products.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getSessionOrder } from '@/api/orders.api';
@@ -245,13 +245,14 @@ function CheckIcon() {
 
 export default function Step2Products() {
   const navigate = useNavigate();
-  const { returnId, setReturnId, setViewReturnId, goToStep } = useWizardStore();
+  const { returnId, setReturnId, setViewReturnId, goToStep, currentStep } = useWizardStore();
   const [phase, setPhase] = useState<Phase>('selecting');
   const [selected, setSelected] = useState<SelectedItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [evidenceDone, setEvidenceDone] = useState<Set<string>>(new Set());
   const [reasonModal, setReasonModal] = useState<ReasonModalItem | null>(null);
+  const didNavigateToStep3 = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['session-order'],
@@ -267,7 +268,13 @@ export default function Step2Products() {
       // Seleccionar — agregar y abrir modal de motivo inmediatamente
       setSelected((prev) => [
         ...prev,
-        { orderItemId: item.id, reasonCodes: [], comments: '', quantity: 1, productName: item.productName },
+        {
+          orderItemId: item.id,
+          reasonCodes: [],
+          comments: '',
+          quantity: 1,
+          productName: item.productName,
+        },
       ]);
       setReasonModal({ item, currentCode: '' });
     }
@@ -318,19 +325,26 @@ export default function Step2Products() {
   }
 
   function handleEvidenceDone(itemId: string) {
-    setEvidenceDone((prev) => {
-      const next = new Set([...prev, itemId]);
-      if (itemsNeedingEvidence.every((s) => next.has(s.devolucionItemId!))) {
-        goToStep(3);
-        navigate('/paso-3');
-      }
-      return next;
-    });
+    setEvidenceDone((prev) => new Set([...prev, itemId]));
   }
 
-  const itemsNeedingEvidence = selected.filter((s) => s.requiresEvidence && s.devolucionItemId);
+  const itemsNeedingEvidence = useMemo(
+    () => selected.filter((s) => s.requiresEvidence && s.devolucionItemId),
+    [selected],
+  );
   const selCount = selected.length;
   const allHaveReason = selected.every((s) => s.reasonCodes.length > 0);
+  const allEvidenceUploaded =
+    phase === 'evidence' &&
+    itemsNeedingEvidence.length > 0 &&
+    itemsNeedingEvidence.every((s) => evidenceDone.has(s.devolucionItemId!));
+
+  useEffect(() => {
+    if (!allEvidenceUploaded || didNavigateToStep3.current) return;
+    didNavigateToStep3.current = true;
+    if (currentStep !== 3) goToStep(3);
+    navigate('/paso-3');
+  }, [allEvidenceUploaded, currentStep, goToStep, navigate]);
 
   if (isLoading) {
     return (

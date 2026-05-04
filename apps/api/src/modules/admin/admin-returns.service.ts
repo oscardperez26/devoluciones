@@ -52,7 +52,10 @@ export class AdminReturnsService {
     const skip = (page - 1) * limit;
 
     const where = {
-      ...(status && { estado: status as EstadoDevolucion }),
+      // Excluir borradores — solo solicitudes enviadas o más avanzadas
+      estado: status
+        ? (status as EstadoDevolucion)
+        : { not: EstadoDevolucion.BORRADOR },
       ...(dateFrom && { creadoEn: { gte: new Date(dateFrom) } }),
       ...(dateTo && { creadoEn: { lte: new Date(dateTo) } }),
       ...(search && {
@@ -63,28 +66,28 @@ export class AdminReturnsService {
       }),
     };
 
-    const returns = await this.prisma.run(() =>
-      this.prisma.devolucion.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { creadoEn: 'desc' },
-        select: {
-          id: true,
-          numeroTicket: true,
-          estado: true,
-          totalReembolso: true,
-          metodoEntrega: true,
-          metodoReembolso: true,
-          creadoEn: true,
-          enviadaEn: true,
-          pedido: { select: { numeroPedido: true, nombreCliente: true } },
-          items: { select: { id: true } },
-        },
-      }),
-    );
-    const total = await this.prisma.run(() =>
-      this.prisma.devolucion.count({ where }),
+    const [returns, total] = await this.prisma.run(() =>
+      this.prisma.$transaction([
+        this.prisma.devolucion.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { creadoEn: 'desc' },
+          select: {
+            id: true,
+            numeroTicket: true,
+            estado: true,
+            totalReembolso: true,
+            metodoEntrega: true,
+            metodoReembolso: true,
+            creadoEn: true,
+            enviadaEn: true,
+            pedido: { select: { numeroPedido: true, nombreCliente: true } },
+            items: { select: { id: true } },
+          },
+        }),
+        this.prisma.devolucion.count({ where }),
+      ]),
     );
 
     return {
@@ -104,51 +107,52 @@ export class AdminReturnsService {
   }
 
   async getReturnDetail(returnId: string) {
-    const devolucion = await this.prisma.devolucion.findUnique({
-      where: { id: returnId },
-      include: {
-        pedido: {
-          select: {
-            id: true,
-            numeroPedido: true,
-            nombreCliente: true,
-            fechaEntrega: true,
-          },
-        },
-        items: {
-          include: {
-            pedidoItem: {
-              select: {
-                sku: true,
-                nombreProducto: true,
-                talla: true,
-                color: true,
-              },
-            },
-            evidencias: {
-              select: {
-                id: true,
-                claveArchivo: true,
-                tipoMime: true,
-                tamanioBytes: true,
-              },
+    const devolucion = await this.prisma.run(() =>
+      this.prisma.devolucion.findUnique({
+        where: { id: returnId },
+        include: {
+          pedido: {
+            select: {
+              id: true,
+              numeroPedido: true,
+              nombreCliente: true,
+              fechaEntrega: true,
             },
           },
+          items: {
+            include: {
+              pedidoItem: {
+                select: {
+                  sku: true,
+                  nombreProducto: true,
+                  talla: true,
+                  color: true,
+                },
+              },
+              evidencias: {
+                select: {
+                  id: true,
+                  claveArchivo: true,
+                  tipoMime: true,
+                  tamanioBytes: true,
+                },
+              },
+            },
+          },
         },
-        historial: { orderBy: { creadoEn: 'asc' } },
-      },
-    });
+      }),
+    );
 
     if (!devolucion) throw new NotFoundException('Devolución no encontrada');
 
     return {
       ...devolucion,
       totalReembolso: Number(devolucion.totalReembolso ?? 0),
-      items: devolucion.items.map((item) => ({
-        ...item,
-        valorUnitario: Number(item.valorUnitario),
-        causales: JSON.parse(item.causales) as string[],
-      })),
+      items: devolucion.items.map((item) => {
+        let causales: string[] = [];
+        try { causales = JSON.parse(item.causales) as string[]; } catch { /* malformed — return empty */ }
+        return { ...item, valorUnitario: Number(item.valorUnitario), causales };
+      }),
     };
   }
 
@@ -262,14 +266,18 @@ export class AdminReturnsService {
   }
 
   async getTimeline(returnId: string) {
-    const historial = await this.prisma.historialEstado.findMany({
-      where: { devolucionId: returnId },
-      orderBy: { creadoEn: 'asc' },
+    const exists = await this.prisma.devolucion.findUnique({
+      where: { id: returnId },
+      select: { id: true },
     });
 
-    if (!historial.length)
-      throw new NotFoundException('Devolución no encontrada');
+    if (!exists) throw new NotFoundException('Devolución no encontrada');
 
-    return historial;
+    return this.prisma.run(() =>
+      this.prisma.historialEstado.findMany({
+        where: { devolucionId: returnId },
+        orderBy: { creadoEn: 'asc' },
+      }),
+    );
   }
 }

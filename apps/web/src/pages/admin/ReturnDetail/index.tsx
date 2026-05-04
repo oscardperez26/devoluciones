@@ -87,10 +87,12 @@ export default function ReturnDetail() {
   const [newStatus, setNewStatus] = useState('');
   const [notes, setNotes] = useState('');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-return', id],
     queryFn: () => getReturnDetail(id!),
     enabled: !!id,
+    staleTime: 30_000,
+    retry: 1,
   });
 
   const { data: timeline } = useQuery({
@@ -110,8 +112,17 @@ export default function ReturnDetail() {
     },
   });
 
-  if (isLoading || !data) {
-    return <div className="detail-page">{isLoading ? 'Cargando...' : 'No encontrada.'}</div>;
+  if (isLoading) return <div className="detail-page">Cargando...</div>;
+  if (isError || !data) {
+    return (
+      <div className="detail-page">
+        <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
+        <div className="table-error">
+          <p className="table-error-msg">No se pudo cargar la devolución. Puede que no exista o que el servidor esté caído.</p>
+          <button onClick={() => void refetch()} className="table-retry-btn">Reintentar</button>
+        </div>
+      </div>
+    );
   }
 
   const availableTransitions = TRANSITIONS[data.estado] ?? [];

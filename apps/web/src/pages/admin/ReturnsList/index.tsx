@@ -17,7 +17,7 @@ export default function ReturnsList() {
   const navigate = useNavigate();
   const { filters, setFilter, resetFilters } = useAdminStore();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['admin-returns', filters],
     queryFn: () => listReturns({
       page: filters.page,
@@ -27,6 +27,8 @@ export default function ReturnsList() {
       dateFrom: filters.dateFrom || undefined,
       dateTo: filters.dateTo || undefined,
     }),
+    staleTime: 30_000,
+    retry: 2,
   });
 
   return (
@@ -73,7 +75,14 @@ export default function ReturnsList() {
 
       {/* Tabla */}
       <AdminCard noPadding>
-        {isLoading ? (
+        {isError ? (
+          <div className="table-error">
+            <p className="table-error-msg">No se pudo cargar la lista. Verifica que el servidor esté activo.</p>
+            <button onClick={() => void refetch()} className="table-retry-btn">
+              Reintentar
+            </button>
+          </div>
+        ) : isLoading || isFetching ? (
           <div className="table-empty">Cargando...</div>
         ) : !data?.returns.length ? (
           <div className="table-empty">No hay devoluciones con los filtros actuales.</div>

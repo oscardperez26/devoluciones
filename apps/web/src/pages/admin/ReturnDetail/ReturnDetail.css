@@ -363,3 +363,30 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.5; }
 }
+
+/* ── Estado de error ─────────────────────────────────────────────────────── */
+
+.table-error {
+  padding: 2rem;
+  text-align: center;
+}
+
+.table-error-msg {
+  font-size: 0.875rem;
+  color: var(--color-danger);
+  margin: 0 0 1rem;
+}
+
+.table-retry-btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.table-retry-btn:hover { background-color: #1f2937; }

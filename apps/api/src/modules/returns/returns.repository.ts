@@ -4,6 +4,45 @@ import { EstadoDevolucion, TipoEntrega, TipoReembolso } from '../../common/types
 // Prisma namespace used for DevolucionItemCreateManyInput
 import { PrismaService } from '../../infrastructure/database/prisma.service';
 
+const MAX_TICKET_GENERATION_ATTEMPTS = 8;
+
+function parseTicketSequence(ticket: string | null | undefined): number {
+  if (!ticket) return 0;
+  const match = ticket.match(/(\d+)$/);
+  const parsed = parseInt(match?.[1] ?? '', 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isTicketUniqueConstraintError(error: unknown): boolean {
+  const e = error as {
+    code?: string;
+    message?: string;
+    cause?: { message?: string };
+    meta?: Record<string, unknown>;
+  };
+
+  if (e?.code === 'P2002') return true;
+
+  const target = e?.meta?.['target'];
+  if (Array.isArray(target)) {
+    const joined = target.map(String).join(' ');
+    if (joined.includes('numero_ticket') || joined.includes('UX_devoluciones_numero_ticket')) {
+      return true;
+    }
+  }
+
+  const haystack = [
+    e?.message ?? '',
+    e?.cause?.message ?? '',
+    String(error ?? ''),
+  ].join(' ');
+
+  return (
+    haystack.includes('UX_devoluciones_numero_ticket') ||
+    (haystack.includes('Unique constraint failed') && haystack.includes('numero_ticket'))
+  );
+}
+
 export interface ReturnItemInput {
   pedidoItemId: string;
   causales: string[];
@@ -161,29 +200,46 @@ export class ReturnsRepository {
     );
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
-    const todayCount = await this.prisma.devolucion.count({
-      where: {
-        estado: { not: EstadoDevolucion.BORRADOR },
-        enviadaEn: { gte: startOfDay, lt: endOfDay },
-      },
-    });
+    return this.prisma.run(async () => {
+      const latestToday = await this.prisma.devolucion.findFirst({
+        where: {
+          estado: { not: EstadoDevolucion.BORRADOR },
+          enviadaEn: { gte: startOfDay, lt: endOfDay },
+          numeroTicket: { not: null },
+        },
+        orderBy: { numeroTicket: 'desc' },
+        select: { numeroTicket: true },
+      });
 
-    const ticketNumber = `DV-${dateStr}-${String(todayCount + 1).padStart(4, '0')}`;
+      let nextSequence = parseTicketSequence(latestToday?.numeroTicket);
 
-    return this.prisma.devolucion.update({
-      where: { id: returnId },
-      data: {
-        estado: EstadoDevolucion.ENVIADA,
-        numeroTicket: ticketNumber,
-        enviadaEn: today,
-      },
-      select: {
-        id: true,
-        numeroTicket: true,
-        estado: true,
-        totalReembolso: true,
-        pedido: { select: { correoCliente: true } },
-      },
+      for (let attempt = 1; attempt <= MAX_TICKET_GENERATION_ATTEMPTS; attempt += 1) {
+        nextSequence += 1;
+        const ticketNumber = `DV-${dateStr}-${String(nextSequence).padStart(4, '0')}`;
+
+        try {
+          return await this.prisma.devolucion.update({
+            where: { id: returnId },
+            data: {
+              estado: EstadoDevolucion.ENVIADA,
+              numeroTicket: ticketNumber,
+              enviadaEn: today,
+            },
+            select: {
+              id: true,
+              numeroTicket: true,
+              estado: true,
+              totalReembolso: true,
+              pedido: { select: { correoCliente: true } },
+            },
+          });
+        } catch (error) {
+          const canRetry = attempt < MAX_TICKET_GENERATION_ATTEMPTS;
+          if (!isTicketUniqueConstraintError(error) || !canRetry) throw error;
+        }
+      }
+
+      throw new Error('No fue posible generar un ticket unico para la devolucion');
     });
   }
 }

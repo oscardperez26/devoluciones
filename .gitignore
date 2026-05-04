@@ -9,3 +9,6 @@ coverage
 .vite
 .DS_Store
 *.log
+
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
