@@ -30,20 +30,11 @@
 }
 
 .p2-header-inner {
-  max-width: 56rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 0.625rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.p2-logo {
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: .08em;
-  color: #111827;
-  flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -637,24 +628,36 @@
 .p2-ev-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 1rem;
 }
 
+/* Tarjeta vertical: cabecera (thumb + nombre) + zona de upload */
 .p2-ev-card {
   background: #fff;
   border-radius: 1rem;
   border: 2px solid #e5e7eb;
   overflow: hidden;
   display: flex;
-  gap: 0;
+  flex-direction: column;
 }
 
 .p2-ev-card--done { border-color: #16a34a; }
 
+/* Fila superior: miniatura + nombre */
+.p2-ev-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
 .p2-ev-img-wrap {
   position: relative;
-  width: 5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   flex-shrink: 0;
+  border-radius: 0.625rem;
   overflow: hidden;
   background: #f3f4f6;
 }
@@ -667,56 +670,54 @@
 }
 
 .p2-ev-img-ph {
-  width: 5rem;
-  height: 5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: #d1d5db;
-  background: #f3f4f6;
-  flex-shrink: 0;
 }
 
 .p2-ev-done-overlay {
   position: absolute;
   inset: 0;
   background: rgba(22, 163, 74, .75);
+  border-radius: 0.625rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .p2-ev-done-icon {
-  width: 2rem;
-  height: 2rem;
-}
-
-.p2-ev-info {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
-  min-width: 0;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .p2-ev-name {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: #111827;
   margin: 0;
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Zona de upload / estado "listo" */
+.p2-ev-body {
+  padding: 1rem;
+}
+
 .p2-ev-done-text {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #16a34a;
   margin: 0;
+  text-align: center;
+  padding: 0.5rem 0;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -769,13 +770,43 @@
 }
 
 .p2-action-inner {
-  max-width: 56rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 0.875rem;
+}
+
+/* Botón Volver */
+.p2-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.875rem 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.p2-back-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.p2-back-svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
 }
 
 .p2-action-summary {
@@ -786,6 +817,8 @@
   flex: 1;
   min-width: 0;
 }
+
+.p2-action-spacer { flex: 1; }
 
 .p2-action-count {
   font-weight: 700;
@@ -815,12 +848,29 @@
 .p2-action-btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ══════════════════════════════════════════════════════
-   OVERRIDES STEP INDICATOR dentro del header
+   STEP INDICATOR dentro del header — StepIndicator
+   ocupa todo el ancho disponible
    ══════════════════════════════════════════════════════ */
-.p2-header .step-indicator    { flex: 1; margin-bottom: 0; }
-.p2-header .step-dots         { flex: 1; }
-.p2-header .step-logout       { margin-bottom: 0; }
-.p2-header .step-dot--active  { background-color: var(--koaj) !important; }
-.p2-header .step-dot--done    { background-color: #16a34a !important; }
-.p2-header .step-label--active{ color: var(--koaj) !important; }
-.p2-header .step-connector--done { background-color: #16a34a !important; }
+.p2-header .si-root { flex: 1; }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE MÓVIL
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 479px) {
+  .p2-body { padding: 1rem 0.75rem 6rem; }
+
+  .p2-header-inner { padding: 0.5rem 0.875rem; }
+
+  .p2-grid { gap: 0.625rem; }
+
+  .p2-action-inner { padding: 0.625rem 0.875rem; gap: 0.5rem; }
+
+  .p2-back-btn { padding: 0.4375rem 0.625rem 0.4375rem 0.5rem; font-size: 0.8125rem; }
+
+  .p2-action-summary { font-size: 0.75rem; }
+
+  .p2-action-btn { padding: 0.5625rem 1rem; font-size: 0.875rem; }
+
+  .p2-action-hint,
+  .p2-action-warn { display: none; }
+}

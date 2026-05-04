@@ -360,7 +360,6 @@ export default function Step2Products() {
       {/* Header sticky */}
       <header className="p2-header">
         <div className="p2-header-inner">
-          <span className="p2-logo">KOAJ</span>
           <StepIndicator current={2} />
         </div>
       </header>
@@ -480,23 +479,28 @@ export default function Step2Products() {
                 const done = evidenceDone.has(s.devolucionItemId!);
                 return (
                   <div key={s.devolucionItemId} className={`p2-ev-card ${done ? 'p2-ev-card--done' : ''}`}>
-                    <div className="p2-ev-img-wrap">
-                      {item?.imageUrl
-                        ? <img src={item.imageUrl} alt={item.productName} className="p2-ev-img" />
-                        : <div className="p2-ev-img-ph">👕</div>
-                      }
-                      {done && (
-                        <div className="p2-ev-done-overlay">
-                          <svg viewBox="0 0 24 24" fill="none" className="p2-ev-done-icon">
-                            <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p2-ev-info">
+                    {/* Fila cabecera: miniatura + nombre */}
+                    <div className="p2-ev-header">
+                      <div className="p2-ev-img-wrap">
+                        {item?.imageUrl
+                          ? <img src={item.imageUrl} alt={item.productName} className="p2-ev-img" />
+                          : <div className="p2-ev-img-ph">👕</div>
+                        }
+                        {done && (
+                          <div className="p2-ev-done-overlay">
+                            <svg viewBox="0 0 24 24" fill="none" className="p2-ev-done-icon">
+                              <path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
                       <p className="p2-ev-name">{item?.productName ?? s.orderItemId}</p>
+                    </div>
+
+                    {/* Zona de upload — ancho completo */}
+                    <div className="p2-ev-body">
                       {done
-                        ? <p className="p2-ev-done-text">Foto subida</p>
+                        ? <p className="p2-ev-done-text">✓ Foto subida correctamente</p>
                         : <EvidenceUpload returnId={returnId!} devolucionItemId={s.devolucionItemId!} onUploaded={() => handleEvidenceDone(s.devolucionItemId!)} />
                       }
                     </div>
@@ -508,11 +512,27 @@ export default function Step2Products() {
         )}
       </main>
 
-      {/* Barra de acción sticky */}
-      {phase === 'selecting' && (
-        <div className="p2-action-bar">
-          {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
-          <div className="p2-action-inner">
+      {/* Barra de acción sticky — siempre visible */}
+      <div className="p2-action-bar">
+        {error && <div className="p2-action-error"><ErrorMessage message={error} /></div>}
+        <div className="p2-action-inner">
+          {/* Volver */}
+          <button
+            type="button"
+            className="p2-back-btn"
+            onClick={() => {
+              if (phase === 'evidence') setPhase('selecting');
+              else navigate('/');
+            }}
+          >
+            <svg viewBox="0 0 20 20" fill="none" className="p2-back-svg">
+              <path d="M12 15l-5-5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Volver
+          </button>
+
+          {/* Info central */}
+          {phase === 'selecting' && (
             <div className="p2-action-summary">
               {selCount === 0
                 ? <span className="p2-action-hint">Selecciona una prenda</span>
@@ -522,6 +542,15 @@ export default function Step2Products() {
                   </>
               }
             </div>
+          )}
+          {phase === 'evidence' && (
+            <div className="p2-action-summary">
+              <span className="p2-action-hint">Sube la foto de cada prenda</span>
+            </div>
+          )}
+
+          {/* Continuar (solo en fase selecting) */}
+          {phase === 'selecting' && (
             <button
               type="button"
               disabled={saving || selCount === 0}
@@ -530,9 +559,12 @@ export default function Step2Products() {
             >
               {saving ? 'Guardando...' : 'Continuar →'}
             </button>
-          </div>
+          )}
+
+          {/* Spacer para mantener layout en fase evidence */}
+          {phase === 'evidence' && <div className="p2-action-spacer" />}
         </div>
-      )}
+      </div>
 
       {/* Modal de motivos */}
       {reasonModal && (

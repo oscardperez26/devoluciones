@@ -1,91 +1,217 @@
-/* ── Indicador de pasos ──────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════
+   StepIndicator — header bar completo
+   ══════════════════════════════════════════════════════ */
 
-.step-indicator {
+.si-root {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  gap: 0.75rem;
+  gap: 0.875rem;
+  width: 100%;
 }
 
-.step-dots {
+/* ── Logo ── */
+.si-logo-link {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  flex: 1;
+  text-decoration: none;
 }
 
-.step-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.si-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: block;
 }
 
-.step-dot-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.step-dot {
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.step-dot--active  { background-color: #4f46e5; color: #fff; }
-.step-dot--done    { background-color: #16a34a; color: #fff; }
-.step-dot--pending { background-color: #e5e7eb; color: #9ca3af; }
-
-.step-label {
-  font-size: 0.625rem;
-  display: none;
-  white-space: nowrap;
-}
-
-@media (min-width: 480px) {
-  .step-label { display: block; }
-}
-
-.step-label--active  { color: #4f46e5; font-weight: 600; }
-.step-label--pending { color: #9ca3af; }
-
-.step-connector {
-  width: 1.25rem;
-  height: 2px;
-  margin-bottom: 0.875rem;
+/* ── Separador vertical ── */
+.si-sep {
+  width: 1px;
+  height: 1.5rem;
+  background: #e5e7eb;
   flex-shrink: 0;
 }
 
-.step-connector--done    { background-color: #16a34a; }
-.step-connector--pending { background-color: #e5e7eb; }
+/* ══════════════════════════════════════════════════════
+   TRACK COMPLETO — visible en ≥ 640 px
+   ══════════════════════════════════════════════════════ */
+.si-track {
+  display: none;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
 
-/* ── Botón cerrar sesión ─────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .si-track { display: flex; }
+}
 
-.step-logout {
+/* Un step = [línea?] [dot + label] [línea?] */
+.si-step {
+  display: flex;
+  align-items: center;
+}
+
+/* Columna: dot encima, label abajo */
+.si-step-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Dot */
+.si-dot {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.si-dot--active {
+  background: #4f46e5;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.si-dot--done {
+  background: #16a34a;
+  color: #fff;
+}
+
+.si-dot--pending {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 2px solid #e5e7eb;
+}
+
+.si-check-svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Label */
+.si-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.si-label--active  { color: #4f46e5; font-weight: 700; }
+.si-label--done    { color: #16a34a; }
+.si-label--pending { color: #9ca3af; }
+
+/* Línea conectora */
+.si-line {
+  flex: 1;
+  height: 2px;
+  min-width: 1rem;
+  max-width: 2.5rem;
+  margin-bottom: 1.125rem; /* alinea con el centro del dot (dot 1.875rem + label) */
+  transition: background 0.2s;
+}
+
+.si-line--fill  { background: #16a34a; }
+.si-line--empty { background: #e5e7eb; }
+
+/* ══════════════════════════════════════════════════════
+   TRACK MÓVIL — visible en < 640 px
+   ══════════════════════════════════════════════════════ */
+.si-mobile-track {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .si-mobile-track { display: none; }
+}
+
+.si-mobile-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.si-mobile-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.si-mobile-of {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.si-mobile-bar {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.si-mobile-fill {
+  height: 100%;
+  background: #4f46e5;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* ── Botón Cerrar sesión ── */
+.si-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.75rem;
   color: #9ca3af;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 0;
-  transition: color 0.15s;
-  padding: 0;
   white-space: nowrap;
   flex-shrink: 0;
+  padding: 0;
+  transition: color 0.15s;
 }
 
-.step-logout:hover {
-  color: #ef4444;
+.si-logout:hover { color: #ef4444; }
+
+/* En móvil pequeño, solo muestra el ícono de salida */
+.si-logout-label { display: none; }
+
+@media (min-width: 480px) {
+  .si-logout-label { display: inline; }
 }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE MÓVIL
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 479px) {
+  .si-root { gap: 0.5rem; }
+
+  .si-logo { width: 1.75rem; height: 1.75rem; }
+
+  .si-sep { display: none; }
+
+  .si-mobile-name { font-size: 0.8125rem; }
+}
+
+/* ── Overrides desde páginas que embeben StepIndicator ── */
+.step-indicator    { margin-bottom: 0; }
+.step-logout       { margin-bottom: 0; }
