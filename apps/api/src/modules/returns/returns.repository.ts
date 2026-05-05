@@ -102,67 +102,63 @@ export class ReturnsRepository {
       0,
     );
 
-    const existing = await this.prisma.devolucion.findFirst({
-      where: { pedidoId: orderId, estado: EstadoDevolucion.BORRADOR },
-      select: { id: true },
-    });
+    return this.prisma.run(async () => {
+      const { devolucionId, createdItems } = await this.prisma.$transaction(async (tx) => {
+        const existing = await tx.devolucion.findFirst({
+          where: { pedidoId: orderId, estado: EstadoDevolucion.BORRADOR },
+          select: { id: true },
+        });
 
-    let devolucionId: string;
+        let devolucionId: string;
 
-    if (existing) {
-      await this.prisma.devolucionItem.deleteMany({
-        where: { devolucionId: existing.id },
-      });
-      await this.prisma.devolucion.update({
-        where: { id: existing.id },
-        data: { totalReembolso, correoClienteHash: emailHash },
-      });
-      devolucionId = existing.id;
-    } else {
-      const created = await this.prisma.devolucion.create({
-        data: {
-          pedidoId: orderId,
-          correoClienteHash: emailHash,
-          totalReembolso,
-          estado: EstadoDevolucion.BORRADOR,
-        },
-        select: { id: true },
-      });
-      devolucionId = created.id;
-    }
+        if (existing) {
+          await tx.devolucionItem.deleteMany({ where: { devolucionId: existing.id } });
+          await tx.devolucion.update({
+            where: { id: existing.id },
+            data: { totalReembolso, correoClienteHash: emailHash },
+          });
+          devolucionId = existing.id;
+        } else {
+          const created = await tx.devolucion.create({
+            data: {
+              pedidoId: orderId,
+              correoClienteHash: emailHash,
+              totalReembolso,
+              estado: EstadoDevolucion.BORRADOR,
+            },
+            select: { id: true },
+          });
+          devolucionId = created.id;
+        }
 
-    const itemsData: Prisma.DevolucionItemCreateManyInput[] = items.map(
-      (i) => ({
+        const itemsData: Prisma.DevolucionItemCreateManyInput[] = items.map((i) => ({
+          devolucionId,
+          pedidoItemId: i.pedidoItemId,
+          causales: JSON.stringify(i.causales),
+          comentarios: i.comentarios,
+          cantidad: i.cantidad,
+          valorUnitario: i.valorUnitario,
+        }));
+
+        await tx.devolucionItem.createMany({ data: itemsData });
+
+        const createdItems = await tx.devolucionItem.findMany({
+          where: { devolucionId },
+          select: { id: true, pedidoItemId: true, causales: true, valorUnitario: true, cantidad: true },
+        });
+
+        return { devolucionId, createdItems };
+      });
+
+      return {
         devolucionId,
-        pedidoItemId: i.pedidoItemId,
-        causales: JSON.stringify(i.causales),
-        comentarios: i.comentarios,
-        cantidad: i.cantidad,
-        valorUnitario: i.valorUnitario,
-      }),
-    );
-
-    await this.prisma.devolucionItem.createMany({ data: itemsData });
-
-    const createdItems = await this.prisma.devolucionItem.findMany({
-      where: { devolucionId },
-      select: {
-        id: true,
-        pedidoItemId: true,
-        causales: true,
-        valorUnitario: true,
-        cantidad: true,
-      },
+        items: createdItems.map((item) => ({
+          ...item,
+          causales: JSON.parse(item.causales) as string[],
+        })),
+        totalReembolso,
+      };
     });
-
-    return {
-      devolucionId,
-      items: createdItems.map((item) => ({
-        ...item,
-        causales: JSON.parse(item.causales) as string[],
-      })),
-      totalReembolso,
-    };
   }
 
   async updateDelivery(

@@ -29,25 +29,27 @@ export class ReturnsService {
   async createOrUpdateDraft(ctx: AccessContext, dto: CreateReturnDto) {
     const orderItemIds = dto.items.map((i) => i.orderItemId);
 
-    const pedido = await this.prisma.pedido.findUnique({
-      where: { id: ctx.orderId },
-      select: {
-        id: true,
-        fechaEntrega: true,
-        fechaCompra: true,
-        items: {
-          where: { id: { in: orderItemIds } },
-          select: {
-            id: true,
-            precioUnitario: true,
-            esDevolvible: true,
-            devoluciones: {
-              select: { devolucion: { select: { id: true, estado: true } } },
+    const pedido = await this.prisma.run(() =>
+      this.prisma.pedido.findUnique({
+        where: { id: ctx.orderId },
+        select: {
+          id: true,
+          fechaEntrega: true,
+          fechaCompra: true,
+          items: {
+            where: { id: { in: orderItemIds } },
+            select: {
+              id: true,
+              precioUnitario: true,
+              esDevolvible: true,
+              devoluciones: {
+                select: { devolucion: { select: { id: true, estado: true } } },
+              },
             },
           },
         },
-      },
-    });
+      }),
+    );
 
     if (!pedido) throw new NotFoundException('Pedido no encontrado');
 
