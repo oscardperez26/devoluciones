@@ -16,6 +16,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    const isProduction = process.env['NODE_ENV'] === 'production';
+
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -31,11 +33,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
         exception instanceof Error ? exception.message : String(exception),
       );
     } else if (status >= 400) {
-      this.logger.warn(`[${status}] ${exception instanceof Error ? exception.message : String(exception)}`);
+      this.logger.warn(
+        `[${status}] ${exception instanceof Error ? exception.message : String(exception)}`,
+      );
     }
 
+    // En producción, los errores 5xx no exponen detalles internos al cliente
+    const safeResponse =
+      status >= 500 && isProduction
+        ? 'Error interno del servidor'
+        : rawResponse;
+
     const error =
-      typeof rawResponse === 'string' ? { message: rawResponse } : rawResponse;
+      typeof safeResponse === 'string'
+        ? { message: safeResponse }
+        : safeResponse;
 
     response.status(status).json({
       success: false,

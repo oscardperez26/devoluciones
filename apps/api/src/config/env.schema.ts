@@ -23,6 +23,8 @@ const envSchema = z
     RESEND_API_KEY: z.string().trim().min(1, 'RESEND_API_KEY is required.'),
     EMAIL_FROM: z.string().trim().min(1, 'EMAIL_FROM is required.'),
     PORT: z.coerce.number().int().positive().optional(),
+    NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
+    ALLOWED_ORIGINS: z.string().trim().optional(),
   })
   .passthrough();
 
